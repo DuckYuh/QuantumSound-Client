@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button, Input } from "@/components/ui";
 import { authService } from "@/services/auth.service";
 import { useAuth } from "@/providers/AuthProvider";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface LoginFormProps {
   onSubmit?: (data: {
@@ -23,6 +23,7 @@ export default function LoginForm({
   const [password, setPassword] = useState("");
 
   const { login, user } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,9 +32,8 @@ export default function LoginForm({
       console.log("Đăng nhập thành công:", response);
       login(response.data.access_token, response.data.user);
 
-      if (user) {
-        redirect("/");
-      }
+      router.refresh(); 
+      router.push("/");
     } catch (error) {
       console.error("Login error:", error);
     }
