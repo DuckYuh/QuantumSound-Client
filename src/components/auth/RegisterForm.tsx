@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button, Input } from "@/components/ui";
 import { authService } from "@/services/auth.service";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useAuth } from "@/providers/AuthProvider";
 
 interface RegisterFormProps {
@@ -25,7 +25,6 @@ export default function RegisterForm({
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
   const { login, user } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +35,7 @@ export default function RegisterForm({
       login(response.data.access_token, response.data.user);
 
       if (user) {
-        router.push("/");
+        redirect("/");
       }
     } catch (error) {
       console.error("Register error:", error);
