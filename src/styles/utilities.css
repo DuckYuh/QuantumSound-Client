@@ -1,0 +1,26 @@
+@utility glass {
+	background: rgb(255 255 255 / 0.05);
+	backdrop-filter: blur(20px);
+	border: 1px solid rgb(255 255 255 / 0.08);
+}
+
+@utility hide-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+@utility text-gradient {
+	background: linear-gradient(
+		90deg,
+		var(--color-primary),
+		var(--color-secondary)
+	);
+
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}

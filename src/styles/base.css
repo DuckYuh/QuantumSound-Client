@@ -1,0 +1,93 @@
+@layer base {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	* {
+		margin: 0;
+		padding: 0;
+	}
+
+	html {
+		scroll-behavior: smooth;
+		-webkit-text-size-adjust: 100%;
+	}
+
+	body {
+		min-height: 100vh;
+		background-color: var(--color-background);
+		color: var(--color-foreground);
+		font-family: var(--font-sans);
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	img,
+	picture,
+	video,
+	canvas,
+	svg {
+		display: block;
+		max-width: 100%;
+	}
+
+	button,
+	input,
+	select,
+	textarea {
+		font: inherit;
+		color: inherit;
+	}
+
+	button {
+		cursor: pointer;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	ul,
+	ol {
+		list-style: none;
+	}
+
+	::selection {
+		background: var(--color-primary);
+		color: white;
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+}
+
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--color-surface-hover);
+	border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--color-border-hover);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+	-webkit-text-fill-color: var(--color-foreground);
+	-webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset;
+}
