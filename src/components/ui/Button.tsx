@@ -69,16 +69,16 @@ export interface ButtonProps
 	rightIcon?: React.ReactNode;
 }
 
-export function Button({
-	className,
-	variant,
-	size,
-	loading,
-	leftIcon,
-	rightIcon,
-	children,
-	disabled,
-	...props
+export function Button({ 
+	className, 
+	variant, 
+	size, 
+	loading, 
+	leftIcon, 
+	rightIcon, 
+	children, 
+	disabled, 
+	...props 
 }: ButtonProps) {
 	return (
 		<button

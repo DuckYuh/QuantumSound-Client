@@ -13,9 +13,9 @@ export default function AppShell({ children, }: { children: React.ReactNode; }) 
 		<>
 			<Navbar />
 			{user && <Sidebar />}
-			<main>
+			<div>
 				{children}
-			</main>
+			</div>
             {user && <Detailbar/>}
 			{user && <Player />}
 		</>
