@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (token: string, user: User) => void;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  updateUser: (data: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,6 +63,12 @@ export function AuthProvider({ children, }: { children: ReactNode; }) {
         setUser(null);
     }
 
+    function updateUser(data: Partial<User>) {
+        setUser(prev =>
+            prev ? { ...prev, ...data } : prev
+        );
+    }
+
     return (
         <AuthContext.Provider
             value={{
@@ -70,6 +77,7 @@ export function AuthProvider({ children, }: { children: ReactNode; }) {
                 login,
                 logout,
                 refreshUser,
+                updateUser,
             }}
         >
             {children}
@@ -79,8 +87,7 @@ export function AuthProvider({ children, }: { children: ReactNode; }) {
 }
 
 export function useAuth(){
-    const context =
-        useContext(AuthContext);
+    const context = useContext(AuthContext);
 
     if(!context){
         throw new Error(

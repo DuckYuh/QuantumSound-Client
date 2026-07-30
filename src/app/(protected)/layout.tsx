@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/providers/AuthProvider";
 import { redirect } from "next/navigation";
+import AppLayout from "@/components/layout/AppLayout";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const {user, loading} = useAuth();
@@ -10,5 +11,5 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
     if(!user)   redirect("/login");
 
-    return children;
+    return <AppLayout>{children}</AppLayout>;
 }

@@ -5,6 +5,7 @@ import { Button, Input } from "@/components/ui";
 import { authService } from "@/services/auth.service";
 import { useAuth } from "@/providers/AuthProvider";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface LoginFormProps {
   onSubmit?: (data: {
@@ -31,11 +32,12 @@ export default function LoginForm({
       const response = await authService.login({ email, password });
       console.log("Đăng nhập thành công:", response);
       login(response.data.access_token, response.data.user);
-
+      toast.success("Welcome back!");
       router.refresh(); 
       router.push("/");
     } catch (error) {
       console.error("Login error:", error);
+      toast.error("Invalid email or password.");
     }
   };
 

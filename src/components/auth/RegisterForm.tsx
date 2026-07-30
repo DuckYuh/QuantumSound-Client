@@ -5,6 +5,7 @@ import { Button, Input } from "@/components/ui";
 import { authService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/AuthProvider";
+import { toast } from "sonner";
 
 interface RegisterFormProps {
   onSubmit?: (data: {
@@ -34,11 +35,12 @@ export default function RegisterForm({
       const response = await authService.register({username, displayName, email, password,});
       console.log("Đăng ký thành công:", response);
       login(response.data.access_token, response.data.user);
-
+      toast.success("Account created successfully.");
       router.refresh(); 
       router.push("/");
     } catch (error) {
       console.error("Register error:", error);
+      toast.error("Failed to register.");
     }
   };
 
