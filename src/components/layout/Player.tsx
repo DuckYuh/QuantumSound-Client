@@ -1,41 +1,89 @@
+"use client";
+
+import { useAudio } from "@/providers/AudioProvider";
+import PlayerControls from "@/components/player/PlayerControls";
+import PlayerProgress from "@/components/player/PlayerProgress";
+import VolumeControl from "@/components/player/PlayerVolume";
+
 export default function Player() {
-	return (
-		<footer className="fixed bottom-0 left-0 z-40 w-full border-t border-border bg-background/90 backdrop-blur-xl">
-			<div className="grid h-[var(--spacing-player)] grid-cols-1 gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[1.1fr_1.6fr_1fr] lg:px-8">
-				<div className="flex items-center gap-4">
-					<div className="h-14 w-14 rounded-xl bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary)_55%,#020617)] shadow-md" />
-					<div>
-						<p className="text-xs uppercase tracking-[0.3em] text-muted">Player</p>
-						<p className="font-medium text-foreground">Electric Tide</p>
-						<p className="text-sm text-muted">Artist name</p>
-					</div>
-				</div>
+	const { currentTrack } = useAudio();
 
-				<div className="flex flex-col items-center justify-center gap-3">
-					<div className="flex items-center gap-3 text-foreground">
-						<button className="rounded-full bg-surface-hover px-3 py-2 text-sm hover:bg-surface-active">
-							⏮
-						</button>
-						<button className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-background hover:bg-primary-hover">
-							⏵
-						</button>
-						<button className="rounded-full bg-surface-hover px-3 py-2 text-sm hover:bg-surface-active">
-							⏭
-						</button>
-					</div>
-					<div className="h-1.5 w-full max-w-md rounded-full bg-surface-hover">
-						<div className="h-full w-2/5 rounded-full bg-primary" />
-					</div>
-				</div>
+    if (!currentTrack) return (
+		<div className="fixed bottom-0 left-0 right-0 h-24 border-t bg-background px-6 flex items-center justify-between z-50">
 
-				<div className="flex items-center justify-end gap-3 text-sm text-muted">
-					<span>00:56</span>
-					<div className="h-1.5 w-36 rounded-full bg-surface-hover">
-						<div className="h-full w-3/4 rounded-full bg-foreground" />
-					</div>
-					<span>03:48</span>
-				</div>
-			</div>
-		</footer>
+            {/* Left */}
+            <div className="flex items-center gap-3 w-1/4">
+                <div className="h-14 w-14 rounded-xl bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary)_55%,#020617)] shadow-md" />
+
+                <div>
+                    <div className="font-medium">
+                        Title
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                        Artist Name
+                    </div>
+                </div>
+            </div>
+
+            {/* Center */}
+            <div className="flex flex-col items-center gap-2 flex-1">
+                <PlayerControls />
+                <PlayerProgress />
+            </div>
+
+            {/* Right */}
+            <div className="w-1/4 flex justify-end">
+                <VolumeControl />
+            </div>
+        </div>
 	);
+
+	return (
+        <div className="fixed bottom-0 left-0 right-0 h-24 border-t border-border bg-background px-6 flex items-center justify-between z-50">
+
+            {/* Left */}
+            <div className="flex items-center gap-3 w-1/4">
+				{currentTrack ? (
+					<>
+						<div className="h-14 w-14 rounded bg-muted overflow-hidden">
+							{currentTrack.coverImage && (
+								<img
+									src={currentTrack.coverImage}
+									alt={currentTrack.title}
+									className="w-full h-full object-cover"
+								/>
+							)}
+						</div>
+						<div>
+							<div className="font-medium">
+								{currentTrack.title}
+							</div>
+							<div className="text-sm text-muted-foreground">
+								{currentTrack.artist.displayName}
+							</div>
+						</div>
+					</>
+				) : (
+					<>
+						<div className="h-14 w-14 rounded-xl bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary)_55%,#020617)] shadow-md" />
+						<div>
+							<div className="font-medium">Title</div>
+							<div className="text-sm text-muted-foreground">Artist Name</div>
+						</div>
+					</>
+				)}
+            </div>
+
+            {/* Center */}
+            <div className="flex flex-col items-center gap-2 flex-1">
+                <PlayerControls />
+                <PlayerProgress />
+            </div>
+
+            {/* Right */}
+            <div className="w-1/4 flex justify-end">
+                <VolumeControl />
+            </div>
+        </div>
+    );
 }

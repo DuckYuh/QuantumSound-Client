@@ -1,5 +1,5 @@
-import ProfileSection from "../../../components/settings/ProfileSection";
-import PasswordSection from "../../../components/settings/PasswordSection";
+import ProfileSection from "@/components/settings/ProfileSection";
+import PasswordSection from "@/components/settings/PasswordSection";
 
 export default function Settings() {
   return (

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { AudioProvider } from "@/providers/AudioProvider";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -35,8 +36,10 @@ export default function RootLayout({children, }: Readonly<{children: React.React
     >
       <body className="min-h-screen bg-background text-foreground">
         <AuthProvider>
-          {children}
-          <Toaster richColors position="top-right" />
+          <AudioProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+          </AudioProvider>
         </AuthProvider>
       </body>
     </html>

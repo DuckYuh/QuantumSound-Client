@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { albumService } from "@/services/album.service";
 import { Loading } from "@/components/ui";
 import { Album } from "@/types/album";
+import { useRouter } from "next/navigation";
 
 interface ProfileHeaderProps {
   targetUser: {
@@ -14,6 +15,8 @@ interface ProfileHeaderProps {
 export default function ProfileMusics({ targetUser }: ProfileHeaderProps) {
     const [userAlbums, setUserAlbums] = useState<Album[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const router = useRouter();
 
     async function fetchUserAlbums() {
         try {
@@ -47,7 +50,7 @@ export default function ProfileMusics({ targetUser }: ProfileHeaderProps) {
             <div className="text-lg font-bold">Uploaded Musics</div>
             <div className="flex flex-col gap-2">
                 {userAlbums.map((album) => (
-                    <div key={album.slug} className="p-2 border rounded">
+                    <div key={album.slug} className="p-2 border rounded" onClick={() => router.push(`/album/${album.slug}`)}>
                         <div className="font-semibold">{album.title}</div>
                         <div className="text-sm text-gray-500">{album.type}</div>
                     </div>

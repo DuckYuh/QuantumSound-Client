@@ -86,7 +86,7 @@ export function AuthProvider({ children, }: { children: ReactNode; }) {
 
 }
 
-export function useAuth(){
+export function useAuth() {
     const context = useContext(AuthContext);
 
     if(!context){

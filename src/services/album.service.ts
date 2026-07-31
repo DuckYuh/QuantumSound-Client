@@ -12,5 +12,9 @@ export const albumService = {
 
     getAlbumById(albumId: string) {
         return api.get(`/albums/${albumId}`);
+    },
+
+    getAlbumBySlug(slug: string) {
+        return api.get(`/albums/slug/${slug}`);
     }
 }
