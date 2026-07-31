@@ -2,6 +2,7 @@ export interface Track {
   id: string;
   title: string;
   slug: string;
+  audioUrl: string;
   description?: string | null;
   coverImage?: string | null;
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
@@ -12,6 +13,18 @@ export interface Track {
   artistId: string;
   createdAt: string;
   updatedAt: string;
+  artist: {
+        id: string;
+        username: string;
+        displayName: string;
+        avatar?: string | null;
+    };
+    album: {
+        id: string;
+        title: string;
+        slug: string;
+        coverImage?: string | null;
+    };
 }
 
 export interface UploadTrack {

@@ -20,6 +20,10 @@ export function UserMenu({ user, logout }: Props) {
         router.push("/settings");
     }
 
+    async function handleUploadClick() {
+        router.push("/upload");
+    }
+
     return (
         <Dropdown
             className="bg-surface"
@@ -33,6 +37,10 @@ export function UserMenu({ user, logout }: Props) {
                 {
                     label: "Profile",
                     onClick: handleProfileClick
+                },
+                {
+                    label: "Upload",
+                    onClick: handleUploadClick
                 },
                 {
                     label: "Settings",
