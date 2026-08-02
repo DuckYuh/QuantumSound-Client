@@ -13,7 +13,7 @@ export default async function Profile({ params }: Props) {
   const targetUser = response.data;
 
   return (
-    <div>
+    <div className="flex flex-col gap-8">
       <ProfileHeader targetUser={targetUser} />
       <ProfileMusics targetUser={targetUser} />
       <ProfilePlaylists targetUser={targetUser} />

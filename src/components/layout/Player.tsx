@@ -9,7 +9,7 @@ export default function Player() {
 	const { currentTrack } = useAudio();
 
     if (!currentTrack) return (
-		<div className="fixed bottom-0 left-0 right-0 h-24 border-t bg-background px-6 flex items-center justify-between z-50">
+		<div className="fixed bottom-0 left-0 right-0 h-24 border-t border-border bg-background px-6 flex items-center justify-between z-50">
 
             {/* Left */}
             <div className="flex items-center gap-3 w-1/4">

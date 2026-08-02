@@ -1,6 +1,6 @@
 "use client";
 
-import { Input, Button } from '@/components/ui';
+import { Input, Button, Card, CardTitle, CardContent, CardHeader, CardDescription, CardFooter } from '@/components/ui';
 import { useState } from 'react';
 import { userService } from '@/services/user.service';
 import { toast } from 'sonner';
@@ -32,9 +32,14 @@ export default function PasswordSection() {
   }
 
   return (
-    <div>
-      <div>Password Section</div>
-      <div className="mt-4 space-y-2">
+    <Card>
+      <CardHeader>
+        <CardTitle>Change Password</CardTitle>
+        <CardDescription>
+          Update your account password.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
         <label className="text-sm font-medium">
           Current Password
         </label>
@@ -59,12 +64,12 @@ export default function PasswordSection() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-      </div>
-      <div className="mt-4">
+      </CardContent>
+      <CardFooter>
         <Button onClick={handleUpdatePassword}>
           Update Password
         </Button>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

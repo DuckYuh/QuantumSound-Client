@@ -11,7 +11,7 @@ export default async function AlbumPage({ params }: Props) {
   const albumResponse = await albumService.getAlbumBySlug(slug);
   
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <AlbumInfo targetAlbum={albumResponse.data} />
       <AlbumTrackList targetAlbum={albumResponse.data} />
     </div>
