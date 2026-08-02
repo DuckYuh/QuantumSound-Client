@@ -9,6 +9,10 @@ export interface Album {
   artistId: string;
   createdAt: string;
   updatedAt: string;
+  artist: {
+    id: string;
+    username: string;
+  };
 }
 
 export interface CreateAlbum {

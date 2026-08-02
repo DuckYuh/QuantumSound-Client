@@ -1,10 +1,10 @@
 "use client";
 
-import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { Button, Logo } from "@/components/ui";
 import { useAuth } from '@/providers/AuthProvider';
 import { UserMenu } from './UserMenu';
+import SearchBar from '@/components/search/SearchBar';
 
 export default function Navbar() {
 	const router = useRouter();
@@ -26,10 +26,7 @@ export default function Navbar() {
 
 					<div className="flex min-w-0 flex-1 items-center gap-4 lg:pl-[var(--spacing-sidebar)] lg:pr-[var(--spacing-sidebar)]">
 						<div className="min-w-0 flex-1">
-							<p className="text-xs uppercase tracking-[0.35em] text-muted">Navbar</p>
-							<p className="truncate text-sm text-muted">
-								Discover, library, search, and quick actions live here.
-							</p>
+							<SearchBar />
 						</div>
 
 						

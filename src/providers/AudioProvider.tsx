@@ -10,7 +10,7 @@ interface AudioContextType {
     currentTime: number;
     duration: number;
     volume: number;
-    play(track: Track): void;
+    play(track: Track, list?: Track[]): void;
     pause(): void;
     resume(): void;
     next(): void;

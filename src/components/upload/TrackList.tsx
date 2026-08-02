@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui";
+import { Button, Card, CardTitle, CardContent, CardHeader, CardDescription, CardFooter } from "@/components/ui";
 import TrackItem from "./TrackItem";
 import { TrackFormData } from "@/types/track";
 import { CreateAlbum } from "@/types/album";
@@ -61,67 +61,59 @@ export default function TrackList({
     };
 
     return (
-        <div className="space-y-6">
+        <Card>
+            <CardHeader>
+                <CardTitle>Upload Tracks</CardTitle>
+                <CardDescription>
+                    Add and manage tracks for your album or single.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-6">
+                    {tracks.map((track, index) => (
+                        <TrackItem
+                            key={index}
+                            index={index}
+                            track={track}
+                            canRemove={
+                                album.type !== "SINGLE" &&
+                                tracks.length > 1
+                            }
+                            onChange={(key, value) =>
+                                updateTrack(index, key, value)
+                            }
+                            onRemove={() =>
+                                removeTrack(index)
+                            }
+                        />
+                    ))}
 
-            <div>
-
-                <h2 className="text-2xl font-bold">
-                    Upload Tracks
-                </h2>
-
-                <p className="text-muted-foreground">
-                    Album: {album.title}
-                </p>
-
-            </div>
-
-            {tracks.map((track, index) => (
-                <TrackItem
-                    key={index}
-                    index={index}
-                    track={track}
-                    canRemove={
-                        album.type !== "SINGLE" &&
-                        tracks.length > 1
-                    }
-                    onChange={(key, value) =>
-                        updateTrack(index, key, value)
-                    }
-                    onRemove={() =>
-                        removeTrack(index)
-                    }
-                />
-            ))}
-
-            {album.type !== "SINGLE" && (
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={addTrack}
-                >
-                    + Add Track
-                </Button>
-            )}
-
-            <div className="flex justify-between">
-
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onBack}
-                >
-                    Back
-                </Button>
-
-                <Button
-                    type="button"
-                    onClick={onUpload}
-                >
-                    Upload
-                </Button>
-
-            </div>
-
-        </div>
+                    {album.type !== "SINGLE" && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={addTrack}
+                        >
+                            + Add Track
+                        </Button>
+                    )}
+                    <CardFooter className="flex justify-end space-x-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onBack}
+                        >
+                            Back
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={onUpload}
+                        >
+                            Upload
+                        </Button>
+                    </CardFooter>
+                </div>
+            </CardContent>
+        </Card>
     );
 }
