@@ -12,6 +12,7 @@ export interface Album {
   artist: {
     id: string;
     username: string;
+    displayName: string;
   };
 }
 

@@ -46,12 +46,18 @@ export default function Player() {
 				{currentTrack ? (
 					<>
 						<div className="h-14 w-14 rounded bg-muted overflow-hidden">
-							{currentTrack.coverImage && (
+							{currentTrack.coverImage ? (
 								<img
 									src={currentTrack.coverImage}
 									alt={currentTrack.title}
 									className="w-full h-full object-cover"
 								/>
+							) : (
+								<img
+                                    src={currentTrack.album.coverImage ?? "/Logo512x512.png"}
+                                    alt={currentTrack.title}
+                                    className="w-full h-full object-cover"
+                                />
 							)}
 						</div>
 						<div>

@@ -9,6 +9,8 @@ export interface Track {
   status: "PROCESSING" | "READY" | "BLOCKED" | "DELETED";
   trackNumber: number | null;
   duration: number;
+  genres: string[];
+  tags: string[];
   albumId: string;
   artistId: string;
   createdAt: string;
@@ -33,6 +35,8 @@ export interface UploadTrack {
   coverImage?: File;
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
   albumId: string;
+  genres: string[];
+  tags: string[];
 }
 
 export interface TrackFormData {
@@ -41,4 +45,6 @@ export interface TrackFormData {
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
   audio: File | null;
   coverImage?: File;
+  genres: string[];
+  tags: string[];
 }

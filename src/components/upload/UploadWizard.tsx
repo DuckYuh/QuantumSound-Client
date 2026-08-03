@@ -10,6 +10,7 @@ import { trackService } from '@/services/track.service';
 import { albumService } from '@/services/album.service';
 
 export default function UploadWizard() {
+    const [uploading, setUploading] = useState(false);
     const [step, setStep] = useState<1 | 2>(1);
     const [album, setAlbum] = useState<CreateAlbum>({
         title: "",
@@ -22,10 +23,13 @@ export default function UploadWizard() {
             description: "",
             visibility: "PUBLIC",
             audio: null,
+            genres: [],
+            tags: [],
         },
     ]);
 
     const handleUpload = async () => {
+        setUploading(true);
         try {
             const albumRes = await albumService.createAlbum({
                 title: album.title,
@@ -43,6 +47,8 @@ export default function UploadWizard() {
                         description: track.description,
                         visibility: track.visibility,
                         albumId,
+                        genres: track.genres,
+                        tags: track.tags,
                     },
                     track.audio!
                 );
@@ -52,6 +58,8 @@ export default function UploadWizard() {
             resetWizard();
         } catch (error) {
             toast.error("Upload failed");
+        } finally {
+            setUploading(false);
         }
     }
 
@@ -70,6 +78,8 @@ export default function UploadWizard() {
                 description: "",
                 visibility: "PUBLIC",
                 audio: null,
+                genres: [],
+                tags: [],
             },
         ]);
     }
@@ -92,6 +102,7 @@ export default function UploadWizard() {
                         setTracks={setTracks}
                         onBack={() => setStep(1)}
                         onUpload={handleUpload}
+                        upLoading={uploading}
                     />
                 )}
             </div>
