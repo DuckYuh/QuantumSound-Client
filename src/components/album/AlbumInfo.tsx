@@ -46,7 +46,7 @@ export default function AlbumInfo({ targetAlbum }: Props) {
           {albumResponse.title}
         </div>
         <div className="absolute bottom-6 text-md text-color-foreground hover:underline" onClick={handleArtistClick} style={{ cursor: "pointer" }}>
-          {albumResponse.artist.username}
+          {albumResponse.artist.displayName}
         </div>
       </div>
     </div>

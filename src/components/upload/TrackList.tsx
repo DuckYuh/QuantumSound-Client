@@ -4,6 +4,7 @@ import { Button, Card, CardTitle, CardContent, CardHeader, CardDescription, Card
 import TrackItem from "./TrackItem";
 import { TrackFormData } from "@/types/track";
 import { CreateAlbum } from "@/types/album";
+import { useState } from "react";
 
 interface TrackListProps {
     album: CreateAlbum;
@@ -17,6 +18,8 @@ interface TrackListProps {
     onBack: () => void;
 
     onUpload: () => void;
+
+    upLoading: boolean;
 }
 
 export default function TrackList({
@@ -25,8 +28,8 @@ export default function TrackList({
     setTracks,
     onBack,
     onUpload,
+    upLoading
 }: TrackListProps) {
-
     const updateTrack = (
         index: number,
         key: keyof TrackFormData,
@@ -50,6 +53,8 @@ export default function TrackList({
                 description: "",
                 visibility: "PUBLIC",
                 audio: null,
+                genres: [],
+                tags: [],
             },
         ]);
     };
@@ -108,8 +113,9 @@ export default function TrackList({
                         <Button
                             type="button"
                             onClick={onUpload}
+                            disabled={upLoading}
                         >
-                            Upload
+                            {upLoading ? "Uploading..." : "Upload"}
                         </Button>
                     </CardFooter>
                 </div>

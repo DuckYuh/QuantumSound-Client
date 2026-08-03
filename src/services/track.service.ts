@@ -11,6 +11,13 @@ export const trackService = {
         formData.append("description", data.description ?? "");
         formData.append("albumId", data.albumId);
         formData.append("visibility", data.visibility);
+        for (const genre of data.genres) {
+            formData.append("genres", genre);
+        }
+
+        for (const tag of data.tags) {
+            formData.append("tags", tag);
+        }
 
         if (data.coverImage) {
             formData.append("coverImage", data.coverImage);
