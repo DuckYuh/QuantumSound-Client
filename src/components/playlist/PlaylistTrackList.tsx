@@ -1,22 +1,21 @@
-'use client';
+'use client'
 
 import { useEffect, useState } from "react";
 import { useAudio } from "@/providers/AudioProvider";
-import { trackService } from "@/services/track.service";
+import { playlistService } from "@/services/playlist.service";
+import { Playlist } from "@/types/playlist";
 import { Track } from "@/types/track";
+import { trackService } from "@/services/track.service";
 import { Play, EllipsisVertical } from "lucide-react";
 import { Button, Dropdown } from "@/components/ui";
-import { PlaylistSubmenu } from "@/components/playlist/PlaylistSubmenu";
 
 interface Props {
-    targetAlbum: {
-        id: string;
-    };
+  params: Promise<{ id: string }>;
 }
 
-export default function AlbumTrackList({ targetAlbum }: Props) {
+export default function PlaylistTrackList({ params }: Props) {
     const { play } = useAudio();
-
+    const [playlist, setPlaylist] = useState<Playlist | null>(null);
     const [tracks, setTracks] = useState<Track[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -28,17 +27,32 @@ export default function AlbumTrackList({ targetAlbum }: Props) {
     }
 
     useEffect(() => {
-        async function fetchTracks() {
+        const fetchPlaylist = async () => {
             try {
-                const res = await trackService.findAlbumTracks(targetAlbum.id);
-                setTracks(res.data);
+                const { id } = await params;
+                const response = await playlistService.getPlaylist(id);
+                const playlistData: Playlist = response.data;
+                setPlaylist(playlistData);
+
+                const hydratedTracks = await Promise.all(
+                    playlistData.tracks.map(async (playlistTrack) => {
+                        try {
+                            const trackResponse = await trackService.getTrackById(playlistTrack.trackId);
+                            return trackResponse.data as Track;
+                        } catch (error) {
+                            console.error("Error fetching playlist track:", error);
+                            return null;
+                        }
+                    })
+                );
+
+                setTracks(hydratedTracks.filter((track): track is Track => Boolean(track)));
             } finally {
                 setLoading(false);
             }
         }
-
-        fetchTracks();
-    }, [targetAlbum.id]);
+        fetchPlaylist();
+    }, [params]);
 
     if (loading) {
         return <div>Loading...</div>;
@@ -51,15 +65,15 @@ export default function AlbumTrackList({ targetAlbum }: Props) {
                 <span className="font-bold">Track</span>
                 <span className="font-bold text-right pr-6">Duration</span>
             </div>
-            {tracks.map((track) => (
+            {tracks.map((track, index) => (
                 <div key={track.id} className="group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center p-2 hover:bg-surface-hover">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg justify-self-center">
                         <div className="flex h-4 w-4 items-center justify-center">
                             <span className="group-hover:hidden">
-                                {track.trackNumber}
+                                {index + 1}
                             </span>
                             <Play
-                                className="hidden size-4 fill-white group-hover:block"
+                                className="hidden size-4 group-hover:block fill-white"
                                 onClick={() => play(track, tracks)}
                             />
                         </div>
@@ -78,12 +92,7 @@ export default function AlbumTrackList({ targetAlbum }: Props) {
                             }
                             items={[
                                 {
-                                    label: "Add to Playlist",
-                                    submenu: (
-                                        <PlaylistSubmenu
-                                            trackId={track.id}
-                                        />
-                                    ),
+                                    label: "xxx",
                                 },
                             ]}
                         />
@@ -91,5 +100,5 @@ export default function AlbumTrackList({ targetAlbum }: Props) {
                 </div>
             ))}
         </div>
-    );
+    )
 }

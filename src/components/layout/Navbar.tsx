@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button, Logo } from "@/components/ui";
 import { useAuth } from '@/providers/AuthProvider';
-import { UserMenu } from './UserMenu';
+import { UserMenu } from '../bar/UserMenu';
 import SearchBar from '@/components/search/SearchBar';
 
 export default function Navbar() {
