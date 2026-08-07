@@ -13,7 +13,7 @@ export default function SearchItem({ href, title, image, subtitle }: SearchItemP
     return (
         <Link
             href={href}
-            className="search-dropdown-item flex items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-accent"
+            className="search-dropdown-item flex items-center gap-3 px-4 py-3 text-sm transition-colors hover:bg-primary-hover"
         >
             {image && (
                 <img

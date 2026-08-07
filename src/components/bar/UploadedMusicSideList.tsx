@@ -5,6 +5,7 @@ import { Album } from "@/types/album";
 import { albumService } from "@/services/album.service";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
+import { useQuery } from "@tanstack/react-query";
 
 interface UploadedMusicSideListProps {
   targetUser: {
@@ -13,26 +14,30 @@ interface UploadedMusicSideListProps {
 }
 
 export default function UploadedMusicSideList({ targetUser }: UploadedMusicSideListProps) {
-    const [uploadedMusics, setUploadedMusics] = useState<Album[]>([]);
     const [showAll, setShowAll] = useState(false);
     const router = useRouter();
+
+    const {data: uploadedMusics = [], isLoading, error, } = useQuery<Album[]>({
+        queryKey: ["user-albums", targetUser.username],
+        queryFn: async () => {
+            const response = await albumService.getUserAlbums(targetUser.username);
+            return response.data;
+        }
+    });
+
     const displayedMusics = showAll ? uploadedMusics : uploadedMusics.slice(0, 3);
 
     async function onAlbumClick(slug: string) {
         router.push(`/album/${slug}`);
     }
 
-    useEffect(() => {
-        const fetchUploadedMusics = async () => {
-            try {
-                const response = await albumService.getUserAlbums(targetUser.username);
-                setUploadedMusics(response.data);
-            } catch (error) {
-                console.error("Error fetching uploaded musics:", error);
-            }
-        };
-        fetchUploadedMusics();
-    }, [targetUser.username]);
+    if (isLoading) {
+        return <div>Loading playlists...</div>;
+    }
+
+    if (error) {
+        return <div>Failed to load playlists.</div>;
+    }
 
     if (uploadedMusics.length === 0) {
         return null;

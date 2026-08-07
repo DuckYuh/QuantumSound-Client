@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <div>
-      Home Page
+      Con Me Tui May
     </div>
   );
 }

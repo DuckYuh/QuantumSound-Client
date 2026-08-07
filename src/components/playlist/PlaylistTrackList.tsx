@@ -8,22 +8,58 @@ import { Track } from "@/types/track";
 import { trackService } from "@/services/track.service";
 import { Play, EllipsisVertical } from "lucide-react";
 import { Button, Dropdown } from "@/components/ui";
+import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
 export default function PlaylistTrackList({ params }: Props) {
+    const { user } = useAuth();
     const { play } = useAudio();
     const [playlist, setPlaylist] = useState<Playlist | null>(null);
     const [tracks, setTracks] = useState<Track[]>([]);
     const [loading, setLoading] = useState(true);
+    const isOwner = playlist?.owner.id === user?.id;
 
+    const router = useRouter();
+    
     function formatDuration(seconds: number) {
         const minutes = Math.floor(seconds / 60);
         const remain = seconds % 60;
 
         return `${minutes}:${remain.toString().padStart(2, "0")}`;
+    }
+
+    async function removeTrack(TrackId: string) {
+        if (!playlist) return;
+        try {
+            await playlistService.deleteTrackFromPlaylist(playlist.id, TrackId);
+            setTracks((prevTracks) => prevTracks.filter((track) => track.id !== TrackId));
+            toast.success("Track removed from playlist.");
+        } catch (error) {
+            console.error("Error removing track from playlist:", error);
+            toast.error("Failed to remove track from playlist.");
+        }
+    }
+
+    async function moveToAlbum(TrackId: string) {
+        try {
+            const trackResponse = await trackService.getTrackById(TrackId);
+            router.push(`/album/${trackResponse.data.album.slug}`);
+        } catch (error) {
+            console.error("Error moving to album:", error);
+        }
+    }
+    async function moveToArtist(TrackId: string) {
+        try {
+            const trackResponse = await trackService.getTrackById(TrackId);
+            router.push(`/profile/${trackResponse.data.artist.username}`);
+        } catch (error) {
+            console.error("Error moving to artist:", error);
+        }
     }
 
     useEffect(() => {
@@ -85,6 +121,7 @@ export default function PlaylistTrackList({ params }: Props) {
                         </span>
                         <Dropdown
                             className="bg-surface z-10"
+                            placement="top"
                             trigger={
                                 <Button size="sm" variant="ghost" className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
                                     <EllipsisVertical className="size-4" />
@@ -92,8 +129,19 @@ export default function PlaylistTrackList({ params }: Props) {
                             }
                             items={[
                                 {
-                                    label: "xxx",
+                                    label: "Move to Album",
+                                    onClick: () => moveToAlbum(track.id)
                                 },
+                                {
+                                    label: "Move to Artist",
+                                    onClick: () => moveToArtist(track.id)
+                                },
+                                ...(isOwner ? [
+                                    {
+                                        label: "Remove from Playlist",
+                                        onClick: () => removeTrack(track.id)
+                                    },
+                                ] : []),
                             ]}
                         />
                     </div>

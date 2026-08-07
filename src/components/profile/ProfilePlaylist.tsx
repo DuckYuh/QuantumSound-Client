@@ -63,61 +63,61 @@ export default function ProfilePlaylists({ targetUser }: ProfileHeaderProps) {
 
     return (
         <>
-        <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                    <h2 className="text-lg font-bold items-center flex gap-2">
-                        Playlists
-                    </h2>
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={handleCreatePlaylist}
-                    >
-                        <Plus className="size-4" />
-                    </Button>
+            <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                        <h2 className="text-lg font-bold items-center flex gap-2">
+                            Playlists
+                        </h2>
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={handleCreatePlaylist}
+                        >
+                            <Plus className="size-4" />
+                        </Button>
+                    </div>
+
+                    <div className="flex gap-2">
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => scroll("left")}
+                        >
+                            <ChevronLeft className="size-4" />
+                        </Button>
+
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => scroll("right")}
+                        >
+                            <ChevronRight className="size-4" />
+                        </Button>
+                    </div>
                 </div>
-
-                <div className="flex gap-2">
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => scroll("left")}
-                    >
-                        <ChevronLeft className="size-4" />
-                    </Button>
-
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => scroll("right")}
-                    >
-                        <ChevronRight className="size-4" />
-                    </Button>
+                <div 
+                    ref={scrollRef} 
+                    className="flex gap-5 overflow-x-auto scroll-smooth scrollbar-hide" 
+                >
+                    {userPlaylists.map(playlist => (
+                        <MediaCard
+                            key={playlist.id}
+                            type={"playlist"}
+                            cover={playlist.coverImage ?? "/Logo512x512.png"}
+                            title={playlist.title}
+                            onClick={() => router.push(`/playlist/${playlist.id}`)}
+                        />
+                    ))}
                 </div>
             </div>
-            <div 
-                ref={scrollRef} 
-                className="flex gap-5 overflow-x-auto scroll-smooth scrollbar-hide" 
-            >
-                {userPlaylists.map(playlist => (
-                    <MediaCard
-                        key={playlist.id}
-                        type={"playlist"}
-                        cover={playlist.coverImage ?? "/Logo512x512.png"}
-                        title={playlist.title}
-                        onClick={() => router.push(`/playlist/${playlist.id}`)}
-                    />
-                ))}
-            </div>
-        </div>
-        <PlaylistPopup
-            open={isCreatePopupOpen}
-            onClose={() => setIsCreatePopupOpen(false)}
-            onCreated={() => {
-                fetchUserPlaylists();
-            }}
-        />
+            <PlaylistPopup
+                open={isCreatePopupOpen}
+                onClose={() => setIsCreatePopupOpen(false)}
+                onCreated={() => {
+                    fetchUserPlaylists();
+                }}
+            />
         </>
     );
 }

@@ -8,10 +8,14 @@ import { TrackFormData } from '@/types/track';
 import { toast } from 'sonner';
 import { trackService } from '@/services/track.service';
 import { albumService } from '@/services/album.service';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default function UploadWizard() {
     const [uploading, setUploading] = useState(false);
     const [step, setStep] = useState<1 | 2>(1);
+    const queryClient = useQueryClient();
+    const { user } = useAuth();
     const [album, setAlbum] = useState<CreateAlbum>({
         title: "",
         type: "SINGLE",
@@ -53,7 +57,9 @@ export default function UploadWizard() {
                     track.audio!
                 );
             }
-
+            queryClient.invalidateQueries({ 
+                queryKey: ["user-albums", user?.username] 
+            });
             toast.success("Upload successful");
             resetWizard();
         } catch (error) {

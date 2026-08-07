@@ -14,6 +14,11 @@ export interface Album {
     username: string;
     displayName: string;
   };
+  tracks: {
+    id: string;
+    title: string;
+    slug: string;
+  }[];
 }
 
 export interface CreateAlbum {
@@ -21,4 +26,16 @@ export interface CreateAlbum {
   type: "ALBUM" | "SINGLE" | "EP";
   description?: string | null;
   coverImage?: File;
+}
+
+export interface UpdateAlbumRequest {
+  title?: string;
+  type?: "ALBUM" | "SINGLE" | "EP";
+  description?: string | null;
+  coverImage?: File;
+  status?: "PROCESSING" | "READY" | "BLOCKED" | "DELETED";
+}
+
+export interface ReOrderAlbumTracksRequest {
+  trackIds: string[];
 }

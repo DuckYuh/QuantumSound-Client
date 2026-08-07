@@ -48,3 +48,13 @@ export interface TrackFormData {
   genres: string[];
   tags: string[];
 }
+
+export interface UpdateTrackRequest {
+  title?: string;
+  description?: string | null;
+  coverImage?: File;
+  visibility?: "PUBLIC" | "PRIVATE" | "UNLISTED";
+  status?: "PROCESSING" | "READY" | "BLOCKED" | "DELETED";
+  genres?: string[];
+  tags?: string[];
+}
