@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { UploadTrack } from "@/types/track";
+import { UpdateTrackRequest, UploadTrack } from "@/types/track";
 
 export const trackService = {
     uploadTrack(data: UploadTrack, file: File) {
@@ -24,6 +24,41 @@ export const trackService = {
         }
 
         return api.post("/tracks/upload", formData);
+    },
+
+    updateTrack(trackId: string, data: UpdateTrackRequest) {
+        const formData = new FormData();
+
+        if (data.title) {
+            formData.append("title", data.title);
+        }
+        if (data.description !== undefined) {
+            formData.append("description", data.description ?? "");
+        }
+        if (data.coverImage) {
+            formData.append("coverImage", data.coverImage);
+        }
+        if (data.visibility) {
+            formData.append("visibility", data.visibility);
+        }
+        if (data.status) {
+            formData.append("status", data.status);
+        }
+        if (data.genres) {
+            for (const genre of data.genres) {
+                formData.append("genres", genre);
+            }
+        }
+        if (data.tags) {
+            for (const tag of data.tags) {
+                formData.append("tags", tag);
+            }
+        }
+        return api.patch(`/tracks/update/${trackId}`, formData);
+    },
+
+    deleteTrack(trackId: string) {
+        return api.delete(`/tracks/delete/${trackId}`);
     },
 
     findAlbumTracks(albumId: string) {

@@ -11,7 +11,7 @@ export default function VolumeControl() {
 
     return (
         <div className="flex items-center gap-3">
-            <Volume2 size={18} />
+            <Volume2 size={18} className="fill-white" />
             <input
                 type="range"
                 min={0}

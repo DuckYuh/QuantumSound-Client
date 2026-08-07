@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Button, Input, Textarea } from "@/components/ui";
 import { playlistService } from "@/services/playlist.service";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/providers/AuthProvider";
 
 type PlaylistVisibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 
@@ -18,6 +20,8 @@ export default function PlaylistPopup({ open, onClose, onCreated }: PlaylistPopu
     const [playlistDescription, setPlaylistDescription] = useState("");
     const [visibility, setVisibility] = useState<PlaylistVisibility>("PUBLIC");
     const [submitting, setSubmitting] = useState(false);
+    const queryClient = useQueryClient();
+    const { user } = useAuth();
 
     useEffect(() => {
         if (!open) {
@@ -45,7 +49,9 @@ export default function PlaylistPopup({ open, onClose, onCreated }: PlaylistPopu
                 description: playlistDescription.trim() || undefined,
                 visibility,
             });
-
+            queryClient.invalidateQueries({ 
+                queryKey: ["user-playlists", user?.username] 
+            });
             toast.success("Playlist created successfully.");
             onCreated?.();
             onClose();

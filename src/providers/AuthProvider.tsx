@@ -1,6 +1,7 @@
 "use client";   
 
 import { createContext, useContext, useEffect, useState, ReactNode, } from "react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { authService } from "@/services/auth.service";
 import { User } from "@/types/user";
 
@@ -16,6 +17,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children, }: { children: ReactNode; }) {
+    const [queryClient] = useState(() => new QueryClient());
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -80,7 +82,9 @@ export function AuthProvider({ children, }: { children: ReactNode; }) {
                 updateUser,
             }}
         >
-            {children}
+            <QueryClientProvider client={queryClient}>
+                {children}
+            </QueryClientProvider>
         </AuthContext.Provider>
     );
 

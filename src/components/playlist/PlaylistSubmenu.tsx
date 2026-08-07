@@ -44,7 +44,7 @@ export function PlaylistSubmenu({ trackId }: Props) {
     }
 
     return (
-        <div className="w-72 rounded-xl border border-border bg-card shadow-lg">
+        <div className="w-72 rounded-xl border border-border bg-card shadow-lg bg-surface">
             <div className="max-h-80 overflow-y-auto">
                 {playlists.map((playlist) => (
                     <button

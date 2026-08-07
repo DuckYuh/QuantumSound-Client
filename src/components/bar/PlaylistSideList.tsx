@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Playlist } from "@/types/playlist";
 import { playlistService } from "@/services/playlist.service";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
+import { useQuery } from "@tanstack/react-query";
 
 interface PlaylistSideListProps {
   targetUser: {
@@ -13,26 +14,30 @@ interface PlaylistSideListProps {
 }
 
 export default function PlaylistSideList({ targetUser }: PlaylistSideListProps) {
-    const [playlists, setPlaylists] = useState<Playlist[]>([]);
     const [showAll, setShowAll] = useState(false);
     const router = useRouter();
+
+    const {data: playlists = [], isLoading, error, } = useQuery<Playlist[]>({
+        queryKey: ["user-playlists", targetUser.username],
+        queryFn: async () => {
+            const res = await playlistService.getUserPlaylists(targetUser.username);
+            return res.data;
+        },
+    });
+
     const displayedPlaylists = showAll ? playlists : playlists.slice(0, 3);
 
     async function onPlaylistClick(id: string) {
         router.push(`/playlist/${id}`);
     }
 
-    useEffect(() => {
-        const fetchPlaylists = async () => {
-            try {
-                const response = await playlistService.getUserPlaylists(targetUser.username);
-                setPlaylists(response.data);
-            } catch (error) {
-                console.error("Error fetching playlists:", error);
-            }
-        };
-        fetchPlaylists();
-    }, [targetUser.username]);
+    if (isLoading) {
+        return <div>Loading playlists...</div>;
+    }
+
+    if (error) {
+        return <div>Failed to load playlists.</div>;
+    }
 
     if (playlists.length === 0) {
         return null;

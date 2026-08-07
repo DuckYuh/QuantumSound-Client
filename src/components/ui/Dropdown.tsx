@@ -15,12 +15,14 @@ type DropdownProps = {
     trigger: React.ReactNode;
     items: DropdownItem[];
     className?: string;
+    placement?: "bottom" | "top";
 };
 
 export function Dropdown({ 
     trigger, 
     items, 
-    className 
+    className,
+    placement = "bottom",
 }: DropdownProps) {
     const [open, setOpen] = useState(false);
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
@@ -54,7 +56,9 @@ export function Dropdown({
             </div>
 
             {open && (
-                <div className={`absolute right-0 mt-2 w-52 overflow-visible rounded-xl border border-border bg-card shadow-lg ${className || ""}`}>
+                <div
+                    className={`absolute right-0 w-52 overflow-visible rounded-xl border border-border bg-card shadow-lg ${placement === "top" ? "bottom-full mb-2" : "top-full mt-2"} ${className || ""}`}
+                >
                     {items.map((item) => (
                         <div
                             key={item.label}
@@ -79,13 +83,13 @@ export function Dropdown({
                                     ${item.danger && "text-red-500"}
                                 `}
                             >
-                                {item.submenu && (
-                                    <span>◀</span>
-                                )}
                                 <div className="flex items-center gap-2">
                                     {item.icon}
                                     <span>{item.label}</span>
                                 </div>
+                                {item.submenu && (
+                                    <span>▶</span>
+                                )}
                             </button>
 
                             {item.submenu && hoveredItem === item.label && (
@@ -94,7 +98,7 @@ export function Dropdown({
                                         absolute
                                         right-full
                                         top-0
-                                        mr-1
+                                        mr-0
                                         z-50
                                     "
                                     onMouseEnter={() => setHoveredItem(item.label)}
