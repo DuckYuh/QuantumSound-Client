@@ -6,88 +6,44 @@ import PlayerProgress from "@/components/player/PlayerProgress";
 import VolumeControl from "@/components/player/PlayerVolume";
 
 export default function Player() {
-	const { currentTrack } = useAudio();
+    const { currentTrack } = useAudio();
 
-    if (!currentTrack) return (
-		<div className="fixed bottom-0 left-0 right-0 h-24 border-t border-border bg-background px-6 flex items-center justify-between z-50">
+    const coverImage = currentTrack?.coverImage ?? currentTrack?.album?.coverImage ?? "/Logo512x512.png";
 
+    const title = currentTrack?.title ?? "Title";
+    const artistName = currentTrack?.artist?.displayName ?? "Artist Name";
+
+    return (
+        <div className="fixed bottom-0 left-0 right-0 z-50 flex h-24 items-center justify-between border-t border-border bg-background px-6">
             {/* Left */}
-            <div className="flex items-center gap-3 w-1/4">
-                <div className="h-14 w-14 rounded-xl bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary)_55%,#020617)] shadow-md" />
+            <div className="flex w-1/4 items-center gap-3">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-muted">
+                    <img
+                        src={coverImage}
+                        alt={title}
+                        className="h-full w-full object-cover"
+                    />
+                </div>
 
-                <div>
-                    <div className="font-medium">
-                        Title
+                <div className="min-w-0">
+                    <div className="truncate font-medium">
+                        {title}
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                        Artist Name
+
+                    <div className="truncate text-sm text-muted-foreground">
+                        {artistName}
                     </div>
                 </div>
             </div>
 
             {/* Center */}
-            <div className="flex flex-col items-center gap-2 flex-1">
+            <div className="flex flex-1 flex-col items-center gap-2">
                 <PlayerControls />
                 <PlayerProgress />
             </div>
 
             {/* Right */}
-            <div className="w-1/4 flex justify-end">
-                <VolumeControl />
-            </div>
-        </div>
-	);
-
-	return (
-        <div className="fixed bottom-0 left-0 right-0 h-24 border-t border-border bg-background px-6 flex items-center justify-between z-50">
-
-            {/* Left */}
-            <div className="flex items-center gap-3 w-1/4">
-				{currentTrack ? (
-					<>
-						<div className="h-14 w-14 rounded bg-muted overflow-hidden">
-							{currentTrack.coverImage ? (
-								<img
-									src={currentTrack.coverImage}
-									alt={currentTrack.title}
-									className="w-full h-full object-cover"
-								/>
-							) : (
-								<img
-                                    src={currentTrack.album.coverImage ?? "/Logo512x512.png"}
-                                    alt={currentTrack.title}
-                                    className="w-full h-full object-cover"
-                                />
-							)}
-						</div>
-						<div>
-							<div className="font-medium">
-								{currentTrack.title}
-							</div>
-							<div className="text-sm text-muted-foreground">
-								{currentTrack.artist.displayName}
-							</div>
-						</div>
-					</>
-				) : (
-					<>
-						<div className="h-14 w-14 rounded-xl bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary)_55%,#020617)] shadow-md" />
-						<div>
-							<div className="font-medium">Title</div>
-							<div className="text-sm text-muted-foreground">Artist Name</div>
-						</div>
-					</>
-				)}
-            </div>
-
-            {/* Center */}
-            <div className="flex flex-col items-center gap-2 flex-1">
-                <PlayerControls />
-                <PlayerProgress />
-            </div>
-
-            {/* Right */}
-            <div className="w-1/4 flex justify-end">
+            <div className="flex w-1/4 justify-end">
                 <VolumeControl />
             </div>
         </div>
