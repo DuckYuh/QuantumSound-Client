@@ -5,8 +5,11 @@ import { Card } from "@/components/ui";
 import { useState, useEffect } from "react";
 import { searchService } from "@/services/search.service";
 import { SearchResult } from "@/types/search";
+import { useAudio } from "@/providers/AudioProvider";
+import { Track } from "@/types/track";
 
 export default function SearchDropdown({ query }: { query: string }) {
+    const { playTrack } = useAudio();
     const [results, setResults] = useState<SearchResult | null>(null);
 
     useEffect(() => {
@@ -55,10 +58,11 @@ export default function SearchDropdown({ query }: { query: string }) {
                             {tracks.map((track) => (
                                 <SearchItem
                                     key={track.id}
-                                    href={`/album/${track.album.slug}`}
+                                    onClick={() => playTrack(track as Track)}
                                     title={track.title}
                                     image={track.album.coverImage ?? "/Logo512x512.png"}
                                     subtitle={`${track.artist.displayName} • ${track.album.title}`}
+                                    className="cursor-pointer"
                                 />
                             ))}
                         </div>
@@ -72,7 +76,8 @@ export default function SearchDropdown({ query }: { query: string }) {
                                     href={`/album/${album.slug}`}
                                     title={album.title}
                                     image={album.coverImage ?? "/Logo512x512.png"}
-                                    subtitle={album.artist.displayName}
+                                    subtitle={`${album.artist.displayName} • ${album.type}`}
+                                    className="cursor-pointer"
                                 />
                             ))}
                         </div>
@@ -87,6 +92,7 @@ export default function SearchDropdown({ query }: { query: string }) {
                                     title={artist.displayName}
                                     image={artist.avatar ?? "/Logo512x512.png"}
                                     subtitle={`@${artist.username}`}
+                                    className="cursor-pointer"
                                 />
                             ))}
                         </div>

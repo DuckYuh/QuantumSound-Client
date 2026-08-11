@@ -20,6 +20,7 @@ export interface SearchResult {
         title: string;
         coverImage: string;
         slug: string;
+        type: string;
         artist: {
             id: string;
             username: string;

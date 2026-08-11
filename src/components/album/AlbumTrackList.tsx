@@ -24,7 +24,7 @@ interface Props {
 
 export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEditOrder }: Props) {
     const { user } = useAuth();
-    const { play } = useAudio();
+    const { playTrack } = useAudio();
 
     const [orderedTracks, setOrderedTracks] = useState<Track[]>([]);
     const [savingOrder, setSavingOrder] = useState(false);
@@ -144,13 +144,14 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
                     </div>
                 </div>
             )}
-            <div className="grid grid-cols-[48px_minmax(0,1fr)_auto] items-center p-2 border-b border-gray-700">
+            <div className="grid grid-cols-[48px_minmax(0,1fr)_auto_auto] items-center p-2 border-b border-gray-700">
                 <span className="font-bold text-center">#</span>
                 <span className="font-bold">Track</span>
+                <span className="font-bold justify-self-end pr-4 text-right">Plays</span>
                 <span className="font-bold text-right pr-6">Duration</span>
             </div>
             {(editingOrder ? orderedTracks : tracks).map((track, index) => (
-                <div key={track.id} className="group grid grid-cols-[48px_minmax(0,1fr)_auto] items-center p-2 hover:bg-surface-hover">
+                <div key={track.id} className="group grid grid-cols-[48px_minmax(0,1fr)_auto_auto] items-center p-2 hover:bg-surface-hover">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg justify-self-center">
                         <div className="flex h-4 w-4 items-center justify-center">
                             {editingOrder ? (
@@ -162,13 +163,16 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
                                     </span>
                                     <Play
                                         className="hidden size-4 fill-white group-hover:block"
-                                        onClick={() => play(track, tracks)}
+                                        onClick={() => playTrack(track, tracks)}
                                     />
                                 </>
                             )}
                         </div>
                     </div>
                     <span className="truncate">{track.title}</span>
+                    <div className="text-muted-foreground text-sm justify-self-end pr-10 text-right">
+                        {track.playCount}
+                    </div>
                     <div className="flex items-center justify-end gap-3 justify-self-end">
                         <span className="text-right tabular-nums">
                             {track.duration && formatDuration(track.duration)}

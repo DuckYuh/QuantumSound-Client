@@ -9,6 +9,7 @@ export interface Track {
   status: "PROCESSING" | "READY" | "BLOCKED" | "DELETED";
   trackNumber: number | null;
   duration: number;
+  playCount: number;
   genres: string[];
   tags: string[];
   albumId: string;

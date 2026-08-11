@@ -61,6 +61,14 @@ export const trackService = {
         return api.delete(`/tracks/delete/${trackId}`);
     },
 
+    recordListen(trackId: string) {
+        return api.post(`/tracks/listen/${trackId}`);
+    },
+
+    getPopularTracks(userId: string) {
+        return api.get(`/tracks/popular/${userId}`);
+    },
+
     findAlbumTracks(albumId: string) {
         return api.get(`/tracks/albums/${albumId}`);
     },

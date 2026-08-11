@@ -1,6 +1,7 @@
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import ProfileMusics from "@/components/profile/ProfileMusics";
 import ProfilePlaylists from "@/components/profile/ProfilePlaylist";
+import PopularTracks from "@/components/profile/PopularTracks";
 import { userService } from "@/services/user.service";
 
 interface Props {
@@ -15,6 +16,7 @@ export default async function Profile({ params }: Props) {
   return (
     <div className="flex flex-col gap-8">
       <ProfileHeader targetUser={targetUser} />
+      <PopularTracks targetUser={targetUser} />
       <ProfileMusics targetUser={targetUser} />
       <ProfilePlaylists targetUser={targetUser} />
     </div>
