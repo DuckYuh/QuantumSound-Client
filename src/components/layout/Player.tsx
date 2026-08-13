@@ -3,9 +3,14 @@
 import { useAudio } from "@/providers/AudioProvider";
 import PlayerControls from "@/components/player/PlayerControls";
 import PlayerProgress from "@/components/player/PlayerProgress";
-import VolumeControl from "@/components/player/PlayerVolume";
+import SideControl from "@/components/player/PlayerSide";
 
-export default function Player() {
+type PlayerProps = {
+    IsQueue?: boolean;
+    toggleQueueAction?: () => void;
+};
+
+export default function Player({ IsQueue, toggleQueueAction }: PlayerProps) {
     const { currentTrack } = useAudio();
 
     const coverImage = currentTrack?.coverImage ?? currentTrack?.album?.coverImage ?? "/Logo512x512.png";
@@ -44,7 +49,7 @@ export default function Player() {
 
             {/* Right */}
             <div className="flex w-1/4 justify-end">
-                <VolumeControl />
+                <SideControl IsQueue={IsQueue} toggleQueueAction={toggleQueueAction} />
             </div>
         </div>
     );

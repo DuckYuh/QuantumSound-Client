@@ -54,5 +54,9 @@ export const albumService = {
 
     getAlbumBySlug(slug: string) {
         return api.get(`/albums/slug/${slug}`);
-    }
+    },
+
+    getNewReleases() {
+        return api.get("/albums/new-releases");
+    },
 }

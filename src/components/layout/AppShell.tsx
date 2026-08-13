@@ -1,25 +1,32 @@
 "use client";
 
-import { useAuth } from "@/providers/AuthProvider";
+import { useState } from "react";
 import { useAudio } from "@/providers/AudioProvider";
 import Player from "./Player";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import Detailbar from "./Detailbar";
+import QueueBar from "../player/PlayerQueue";
 
 export default function AppShell({ children, }: { children: React.ReactNode; }) {
-	const { user } = useAuth();
-	const { currentTrack } = useAudio();
+	const { currentTrack, queue } = useAudio();
+	const [isQueue, setIsQueue] = useState(false);
+
+	const toggleQueue = () => {
+		setIsQueue((prev) => !prev);
+	}
 
 	return (
 		<>
 			<Navbar />
-			{user && <Sidebar />}
+			<Sidebar />
 			<div>
 				{children}
 			</div>
-            {user && <Detailbar track={currentTrack} />}
-			{user && <Player />}
+            {isQueue ? 
+				<QueueBar queue={queue} /> : <Detailbar track={currentTrack} />
+			}
+			<Player IsQueue={isQueue} toggleQueueAction={toggleQueue} />
 		</>
 	);
 }
