@@ -7,6 +7,9 @@ import { Album } from "@/types/album";
 import { User } from "@/types/user";
 import SearchItem from "@/components/search/SearchItem";
 import { useAudio } from "@/providers/AudioProvider";
+import { useAuth } from "@/providers/AuthProvider";
+import AuthRequiredModal from "@/components/auth/AuthRequiredModal";
+import { useState } from "react";
 
 interface Props {
     query: string;
@@ -14,6 +17,20 @@ interface Props {
 
 export function SearchResults({query, }: Props) {
     const { playTrack } = useAudio();
+    const { user, loading } = useAuth();
+    const [showAuthRequired, setShowAuthRequired] = useState(false);
+
+    function requireAuth(action: () => void) {
+        if (loading) return;
+
+        if (!user) {
+            setShowAuthRequired(true);
+            return;
+        }
+
+        action();
+    }
+
     const { data, isLoading, isError } = useQuery({
         queryKey: ["search", query],
         queryFn: () => searchService.search(query, 20),
@@ -59,68 +76,80 @@ export function SearchResults({query, }: Props) {
         users.length > 0;
 
     return (
-        <div className="space-y-8">
-            {!hasResults && (
-                <p className="text-muted-foreground">
-                    No results found.
-                </p>
-            )}
+        <>
+            <div className="space-y-8">
+                {!hasResults && (
+                    <p className="text-muted-foreground">
+                        No results found.
+                    </p>
+                )}
 
-            {tracks.length > 0 && (
-                <section>
-                    <h2 className="mb-4 text-xl font-semibold">
-                        Tracks
-                    </h2>
-                    {tracks.map((track: Track) => (
-                        <SearchItem 
-                            key={track.id} 
-                            onClick={() => playTrack(track as Track)}
-                            title={track.title}
-                            image={track.album.coverImage ?? "/Logo512x512.png"}
-                            subtitle={`${track.artist.displayName} • ${track.album.title}`}
-                            className="cursor-pointer"
-                        />
-                    ))}
-                </section>
-            )}
+                {tracks.length > 0 && (
+                    <section>
+                        <h2 className="mb-4 text-xl font-semibold">
+                            Tracks
+                        </h2>
+                        {tracks.map((track: Track) => (
+                            <SearchItem 
+                                key={track.id} 
+                                onClick={() =>
+                                    requireAuth(() => playTrack(track as Track))
+                                }
+                                title={track.title}
+                                image={track.album.coverImage ?? "/Logo512x512.png"}
+                                subtitle={`${track.artist.displayName} • ${track.album.title}`}
+                                className="cursor-pointer"
+                            />
+                        ))}
+                    </section>
+                )}
 
-            {albums.length > 0 && (
-                <section>
-                    <h2 className="mb-4 text-xl font-semibold">
-                        Albums
-                    </h2>
+                {albums.length > 0 && (
+                    <section>
+                        <h2 className="mb-4 text-xl font-semibold">
+                            Albums
+                        </h2>
 
-                    {albums.map((album: Album) => (
-                        <SearchItem 
-                            key={album.id} 
-                            href={`/album/${album.slug}`}
-                            title={album.title}
-                            image={album.coverImage ?? "/Logo512x512.png"}
-                            subtitle={`${album.artist.displayName} • ${album.type}`}
-                            className="cursor-pointer"
-                        />
-                    ))}
-                </section>
-            )}
+                        {albums.map((album: Album) => (
+                            <SearchItem 
+                                key={album.id} 
+                                href={user ? `/album/${album.slug}` : undefined}
+                                onClick={() => requireAuth(() => undefined)}
+                                title={album.title}
+                                image={album.coverImage ?? "/Logo512x512.png"}
+                                subtitle={`${album.artist.displayName} • ${album.type}`}
+                                className="cursor-pointer"
+                            />
+                        ))}
+                    </section>
+                )}
 
-            {users.length > 0 && (
-                <section>
-                    <h2 className="mb-4 text-xl font-semibold">
-                        Users
-                    </h2>
+                {users.length > 0 && (
+                    <section>
+                        <h2 className="mb-4 text-xl font-semibold">
+                            Users
+                        </h2>
 
-                    {users.map((user: User) => (
-                        <SearchItem 
-                            key={user.id} 
-                            href={`/profile/${user.username}`}
-                            title={user.displayName}
-                            image={user.avatar ?? "/Logo512x512.png"}
-                            subtitle={`@${user.username}`}
-                            className="cursor-pointer"
-                        />
-                    ))}
-                </section>
-            )}
-        </div>
+                        {users.map((searchUser: User) => (
+                            <SearchItem 
+                                key={searchUser.id} 
+                                href={user ? `/profile/${searchUser.username}` : undefined}
+                                onClick={() => requireAuth(() => undefined)}
+                                title={searchUser.displayName}
+                                image={searchUser.avatar ?? "/Logo512x512.png"}
+                                subtitle={`@${searchUser.username}`}
+                                className="cursor-pointer"
+                            />
+                        ))}
+                    </section>
+                )}
+            </div>
+            <AuthRequiredModal
+                open={showAuthRequired}
+                onCloseAction={() => setShowAuthRequired(false)}
+                title="Login to open search results"
+                description="You can browse search results, but you need to log in to play tracks or open details."
+            />
+        </>
     )
 }

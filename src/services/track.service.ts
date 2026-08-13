@@ -95,5 +95,13 @@ export const trackService = {
 
     getTrackById(trackId: string) {
         return api.get(`/tracks/${trackId}`);
-    }
+    },
+
+    getMostPopularTracks() {
+        return api.get("/tracks/most-popular");
+    },
+
+    getMostLikedTracks() {
+        return api.get("/tracks/most-liked");
+    },
 }
