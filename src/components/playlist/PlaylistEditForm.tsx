@@ -5,7 +5,8 @@ import { Button, Input, Textarea } from "@/components/ui";
 import { playlistService } from "@/services/playlist.service";
 import { toast } from "sonner";
 import { Playlist } from "@/types/playlist";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 type PlaylistVisibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
 
@@ -21,23 +22,28 @@ export default function PlaylistEditForm({ playlistId, open, onClose, onEdited }
     const [playlistDescription, setPlaylistDescription] = useState("");
     const [coverImage, setCoverImage] = useState<File | null>(null);
     const [visibility, setVisibility] = useState<PlaylistVisibility>("PUBLIC");
-    const [submitting, setSubmitting] = useState(false);
-    const [playlist, setPlaylist] = useState<Playlist | null>(null);
     const queryClient = useQueryClient();
+    const { data: playlist } = useQuery<Playlist>({
+        queryKey: queryKeys.playlist(playlistId),
+        queryFn: async () => (await playlistService.getPlaylist(playlistId)).data,
+        enabled: open,
+    });
+    const updatePlaylist = useMutation({
+        mutationFn: (data: Parameters<typeof playlistService.updatePlaylist>[1]) => playlistService.updatePlaylist(playlistId, data),
+        onSuccess: () => Promise.all([
+            queryClient.invalidateQueries({ queryKey: queryKeys.playlist(playlistId) }),
+            playlist && queryClient.invalidateQueries({ queryKey: queryKeys.userPlaylists(playlist.owner.username) }),
+        ]),
+    });
 
     useEffect(() => {
         if (!open) return;
 
-        async function loadPlaylist() {
-            const CurrentPlaylist = await playlistService.getPlaylist(playlistId);
-            setPlaylist(CurrentPlaylist.data);
-            setPlaylistName(playlist?.title || "");
-            setPlaylistDescription(playlist?.description ?? "");
-            setVisibility(playlist?.visibility || "PUBLIC");
-        }
-
-        loadPlaylist();
-    }, [open, playlistId, playlist?.title, playlist?.description, playlist?.visibility]);
+        if (!playlist) return;
+        setPlaylistName(playlist.title);
+        setPlaylistDescription(playlist.description ?? "");
+        setVisibility(playlist.visibility || "PUBLIC");
+    }, [open, playlist]);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -48,9 +54,8 @@ export default function PlaylistEditForm({ playlistId, open, onClose, onEdited }
             return;
         }
 
-        setSubmitting(true);
         try {
-            await playlistService.updatePlaylist(playlistId, {
+            await updatePlaylist.mutateAsync({
                 title,
                 description: playlistDescription.trim() || undefined,
                 visibility,
@@ -58,13 +63,8 @@ export default function PlaylistEditForm({ playlistId, open, onClose, onEdited }
             });
             toast.success("Playlist updated successfully.");
             onEdited?.();
-            queryClient.invalidateQueries({
-                queryKey: ["user-playlists", playlist?.owner.username]
-            });
         } catch (error) {
             toast.error("Failed to update playlist.");
-        } finally {
-            setSubmitting(false);
         }
     }
 
@@ -144,7 +144,7 @@ export default function PlaylistEditForm({ playlistId, open, onClose, onEdited }
                         <Button type="button" variant="outline" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button type="submit" loading={submitting} disabled={!playlistName.trim()} >
+                        <Button type="submit" loading={updatePlaylist.isPending} disabled={!playlistName.trim()} >
                             Confirm
                         </Button>
                     </div>

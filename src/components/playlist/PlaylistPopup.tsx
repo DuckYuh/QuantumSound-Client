@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { Button, Input, Textarea } from "@/components/ui";
 import { playlistService } from "@/services/playlist.service";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 import { useAuth } from "@/providers/AuthProvider";
 
 type PlaylistVisibility = "PUBLIC" | "PRIVATE" | "UNLISTED";
@@ -19,16 +20,18 @@ export default function PlaylistPopup({ open, onClose, onCreated }: PlaylistPopu
     const [playlistName, setPlaylistName] = useState("");
     const [playlistDescription, setPlaylistDescription] = useState("");
     const [visibility, setVisibility] = useState<PlaylistVisibility>("PUBLIC");
-    const [submitting, setSubmitting] = useState(false);
     const queryClient = useQueryClient();
     const { user } = useAuth();
+    const createPlaylist = useMutation({
+        mutationFn: playlistService.createPlaylist,
+        onSuccess: () => user && queryClient.invalidateQueries({ queryKey: queryKeys.userPlaylists(user.username) }),
+    });
 
     useEffect(() => {
         if (!open) {
             setPlaylistName("");
             setPlaylistDescription("");
             setVisibility("PUBLIC");
-            setSubmitting(false);
         }
     }, [open]);
 
@@ -43,14 +46,10 @@ export default function PlaylistPopup({ open, onClose, onCreated }: PlaylistPopu
         }
 
         try {
-            setSubmitting(true);
-            await playlistService.createPlaylist({
+            await createPlaylist.mutateAsync({
                 title,
                 description: playlistDescription.trim() || undefined,
                 visibility,
-            });
-            queryClient.invalidateQueries({ 
-                queryKey: ["user-playlists", user?.username] 
             });
             toast.success("Playlist created successfully.");
             onCreated?.();
@@ -58,9 +57,7 @@ export default function PlaylistPopup({ open, onClose, onCreated }: PlaylistPopu
         } catch (error) {
             console.error("Error creating playlist:", error);
             toast.error("Failed to create playlist.");
-        } finally {
-            setSubmitting(false);
-        }
+        } finally { /* mutation state drives the pending UI */ }
     }
 
     if (!open) {
@@ -140,7 +137,7 @@ export default function PlaylistPopup({ open, onClose, onCreated }: PlaylistPopu
                         <Button type="button" variant="outline" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button type="submit" loading={submitting} disabled={!playlistName.trim()}>
+                        <Button type="submit" loading={createPlaylist.isPending} disabled={!playlistName.trim()}>
                             Create playlist
                         </Button>
                     </div>

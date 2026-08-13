@@ -10,6 +10,7 @@ import { useAudio } from "@/providers/AudioProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import AuthRequiredModal from "@/components/auth/AuthRequiredModal";
 import { useState } from "react";
+import { queryKeys } from "@/lib/query-keys";
 
 interface Props {
     query: string;
@@ -32,8 +33,8 @@ export function SearchResults({query, }: Props) {
     }
 
     const { data, isLoading, isError } = useQuery({
-        queryKey: ["search", query],
-        queryFn: () => searchService.search(query, 20),
+        queryKey: queryKeys.search(query, 20),
+        queryFn: async () => (await searchService.search(query, 20)).data,
         enabled: !!query,
     });
 
@@ -66,9 +67,9 @@ export function SearchResults({query, }: Props) {
         );
     }
 
-    const tracks = data?.data.tracks ?? [];
-    const albums = data?.data.albums ?? [];
-    const users = data?.data.users ?? [];
+    const tracks = data?.tracks ?? [];
+    const albums = data?.albums ?? [];
+    const users = data?.users ?? [];
 
     const hasResults =
         tracks.length > 0 ||

@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Input, Textarea } from "@/components/ui";
-import { TrackFormData } from "@/types/track";
+import { TrackFormData, UploadTrack } from "@/types/track";
 import { genreService } from "@/services/genre.service";
 import { tagService } from "@/services/tag.service";
 import { trackService } from "@/services/track.service";
 import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 interface AlbumPopupProps {
     albumId: string;
@@ -29,11 +30,10 @@ interface Tag {
 export default function AddTrackForm({ albumId, open, onClose, onSubmit }: AlbumPopupProps) {
     const [genreQuery, setGenreQuery] = useState("");
     const [tagQuery, setTagQuery] = useState("");
-    const [genres, setGenres] = useState<Genre[]>([]);
-    const [tags, setTags] = useState<Tag[]>([]);
     const [tagInput, setTagInput] = useState(""); 
-    const [submitting, setSubmitting] = useState(false);
     const queryClient = useQueryClient();
+    const { data: genres = [] } = useQuery<Genre[]>({ queryKey: ["genres"], queryFn: async () => (await genreService.getAllGenres()).data });
+    const { data: tags = [] } = useQuery<Tag[]>({ queryKey: ["tags"], queryFn: async () => (await tagService.getAllTags()).data });
     const [track, setTrack] = useState<TrackFormData>(
         {
             title: "",
@@ -44,6 +44,10 @@ export default function AddTrackForm({ albumId, open, onClose, onSubmit }: Album
             tags: [],
         },
     );
+    const uploadTrack = useMutation({
+        mutationFn: ({ data, file }: { data: UploadTrack; file: File }) => trackService.uploadTrack(data, file),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.albumTracks(albumId) }),
+    });
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -55,53 +59,22 @@ export default function AddTrackForm({ albumId, open, onClose, onSubmit }: Album
             toast.error("Audio file is required.");
             return;
         }
-        setSubmitting(true);
         try {
-            await trackService.uploadTrack({
+            await uploadTrack.mutateAsync({ data: {
                 title: track.title,
                 description: track.description,
                 visibility: track.visibility,
                 albumId,
                 genres: track.genres,
                 tags: track.tags,
-            }, track.audio);
-            await queryClient.invalidateQueries({
-                queryKey: ["album-tracks", albumId],
-            });
+            }, file: track.audio });
             toast.success("Track added successfully!");
             onSubmit?.();
         } catch (error) {
             toast.error("Failed to add track.");
-        } finally {
-            setSubmitting(false);
-        }
+        } finally { /* mutation state drives the pending UI */ }
     }
     
-    useEffect(() => {
-        let isMounted = true;
-
-        async function fetchGenres() {
-            const res = await genreService.getAllGenres();
-
-            if (isMounted) {
-                setGenres(res.data);
-            }
-        }
-        async function fetchTags() {
-            const res = await tagService.getAllTags();
-            if (isMounted) {
-                setTags(res.data);
-            }
-        }
-
-        fetchGenres();
-        fetchTags();
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
-
     const genreResults = genreQuery.trim()
         ? genres.filter((genre) =>
               genre.name.toLowerCase().includes(genreQuery.trim().toLowerCase())
@@ -316,7 +289,7 @@ export default function AddTrackForm({ albumId, open, onClose, onSubmit }: Album
                         <Button type="button" variant="outline" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button type="submit" loading={submitting} disabled={!track.title.trim() || !track.audio} >
+                        <Button type="submit" loading={uploadTrack.isPending} disabled={!track.title.trim() || !track.audio} >
                             Confirm
                         </Button>
                     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { trackService } from "@/services/track.service";
 import { Track } from "@/types/track";
 import { Loading } from "@/components/ui";
@@ -9,6 +9,7 @@ import { useAudio } from "@/providers/AudioProvider";
 import { toast } from "sonner";
 import { PlaylistSubmenu } from "@/components/playlist/PlaylistSubmenu";
 import { Button, Dropdown } from "@/components/ui";
+import { queryKeys } from "@/lib/query-keys";
 
 interface PopularTracksProps {
     targetUser?: {
@@ -18,23 +19,12 @@ interface PopularTracksProps {
 }
 
 export default function PopularTracks({ targetUser }: PopularTracksProps) {
-    const [popularTracks, setPopularTracks] = useState<Track[]>([]);
+    const { data: popularTracks = [] } = useQuery<Track[]>({
+        queryKey: queryKeys.popularTracks(targetUser?.id ?? ""),
+        queryFn: async () => (await trackService.getPopularTracks(targetUser!.id)).data,
+        enabled: Boolean(targetUser),
+    });
     const { playTrack } = useAudio();
-
-    useEffect(() => {
-        if (!targetUser) return;
-
-        const fetchPopularTracks = async () => {
-            try {
-                const response = await trackService.getPopularTracks(targetUser.id);
-                setPopularTracks(response.data);
-            } catch (error) {
-                console.error("Error fetching popular tracks:", error);
-            }
-        };
-
-        fetchPopularTracks();
-    }, [targetUser]);
 
     function formatDuration(seconds: number) { 
         const minutes = Math.floor(seconds / 60); 

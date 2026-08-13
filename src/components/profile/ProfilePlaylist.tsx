@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Playlist } from "@/types/playlist";
 import { useRouter } from "next/navigation";
 import { Loading, MediaCard, Button } from "@/components/ui";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { playlistService } from "@/services/playlist.service";
 import PlaylistPopup from "@/components/playlist/PlaylistPopup";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 interface ProfileHeaderProps {
   targetUser: {
@@ -15,8 +17,10 @@ interface ProfileHeaderProps {
 }
 
 export default function ProfilePlaylists({ targetUser }: ProfileHeaderProps) {
-    const [userPlaylists, setUserPlaylists] = useState<Playlist[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data: userPlaylists = [], isLoading: loading } = useQuery<Playlist[]>({
+        queryKey: queryKeys.userPlaylists(targetUser.username),
+        queryFn: async () => (await playlistService.getUserPlaylists(targetUser.username)).data,
+    });
     const [isCreatePopupOpen, setIsCreatePopupOpen] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -31,26 +35,9 @@ export default function ProfilePlaylists({ targetUser }: ProfileHeaderProps) {
 
     const router = useRouter();
 
-    async function fetchUserPlaylists() {
-        try {
-            setLoading(true);
-            const response = await playlistService.getUserPlaylists(targetUser.username);
-            setUserPlaylists(response.data);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching user playlists:", error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
     async function handleCreatePlaylist() {
         setIsCreatePopupOpen(true);
     }
-
-    useEffect(() => {
-        fetchUserPlaylists();
-    }, [targetUser.username]);
 
     if (loading) {
         return (
@@ -114,9 +101,7 @@ export default function ProfilePlaylists({ targetUser }: ProfileHeaderProps) {
             <PlaylistPopup
                 open={isCreatePopupOpen}
                 onClose={() => setIsCreatePopupOpen(false)}
-                onCreated={() => {
-                    fetchUserPlaylists();
-                }}
+                onCreated={() => undefined}
             />
         </>
     );

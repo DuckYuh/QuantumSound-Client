@@ -1,41 +1,31 @@
 'use client';
 
 import { playlistService } from "@/services/playlist.service";
-import { Playlist } from "@/types/playlist";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/providers/AuthProvider";
 import AuthRequiredModal from "@/components/auth/AuthRequiredModal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
+import type { Playlist } from "@/types/playlist";
 
 type Props = {
     trackId: string;
 };
 
 export function PlaylistSubmenu({ trackId }: Props) {
-    const [playlists, setPlaylists] = useState<Playlist[]>([]);
-    const [addingPlaylistId, setAddingPlaylistId] = useState<string | null>(null);
     const [showAuthRequired, setShowAuthRequired] = useState(false);
     const { user, loading } = useAuth();
-
-    useEffect(() => {
-        if (loading) return;
-
-        if (!user) {
-            setPlaylists([]);
-            return;
-        }
-
-        const fetchPlaylists = async () => {
-            try {
-                const response = await playlistService.getUserPlaylists(user.username);
-                setPlaylists(response.data);
-            } catch (error) {
-                console.error("Error fetching playlists:", error);
-            }
-        };
-
-        fetchPlaylists();
-    }, [loading, user]);
+    const queryClient = useQueryClient();
+    const { data: playlists = [] } = useQuery<Playlist[]>({
+        queryKey: queryKeys.userPlaylists(user?.username ?? ""),
+        queryFn: async () => (await playlistService.getUserPlaylists(user!.username)).data,
+        enabled: Boolean(user) && !loading,
+    });
+    const addTrack = useMutation({
+        mutationFn: (playlistId: string) => playlistService.addTrack({ playlistId, trackId }),
+        onSuccess: (_, playlistId) => queryClient.invalidateQueries({ queryKey: queryKeys.playlistTracks(playlistId) }),
+    });
 
     async function handleAddTrack(playlistId: string) {
         if (!user) {
@@ -44,19 +34,13 @@ export function PlaylistSubmenu({ trackId }: Props) {
         }
 
         try {
-            setAddingPlaylistId(playlistId);
-            await playlistService.addTrack({
-                playlistId,
-                trackId,
-            });
+            await addTrack.mutateAsync(playlistId);
 
             toast.success("Added to playlist.");
         } catch (error) {
             console.error("Error adding track to playlist:", error);
             toast.error("Failed to add track to playlist.");
-        } finally {
-            setAddingPlaylistId(null);
-        }
+        } finally { /* mutation state drives the pending UI */ }
     }
 
     return (
@@ -68,7 +52,7 @@ export function PlaylistSubmenu({ trackId }: Props) {
                             key={playlist.id}
                             className="w-full px-4 py-3 text-left transition hover:bg-muted disabled:opacity-50 hover:rounded-full"
                             onClick={() => handleAddTrack(playlist.id)}
-                            disabled={addingPlaylistId === playlist.id}
+                            disabled={addTrack.isPending && addTrack.variables === playlist.id}
                         >
                             {playlist.title}
                         </button>

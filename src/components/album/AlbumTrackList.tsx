@@ -10,7 +10,8 @@ import { ArrowDown, ArrowUp, Play, EllipsisVertical } from "lucide-react";
 import { Button, Dropdown } from "@/components/ui";
 import { PlaylistSubmenu } from "@/components/playlist/PlaylistSubmenu";
 import { toast } from "sonner";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 const EMPTY_TRACKS: Track[] = [];
 
@@ -32,7 +33,7 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
     const queryClient = useQueryClient();
 
     const { data: tracks = EMPTY_TRACKS, isLoading } = useQuery<Track[]>({
-        queryKey: ["album-tracks", targetAlbum.id],
+        queryKey: queryKeys.albumTracks(targetAlbum.id),
         queryFn: async () => {
             const res = await trackService.findAlbumTracks(targetAlbum.id);
             return res.data;
@@ -75,6 +76,15 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
         onToggleEditOrder();
     }
 
+    const reorderTracks = useMutation({
+        mutationFn: (trackIds: string[]) => albumService.reOrderAlbumTracks(targetAlbum.id, trackIds),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.albumTracks(targetAlbum.id) }),
+    });
+    const deleteTrack = useMutation({
+        mutationFn: trackService.deleteTrack,
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.albumTracks(targetAlbum.id) }),
+    });
+
     async function handleSaveOrder() {
         if (!editingOrder) {
             return;
@@ -89,30 +99,19 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
             return;
         }
 
-        setSavingOrder(true);
         try {
-            await albumService.reOrderAlbumTracks(targetAlbum.id, nextIds);
-
-            await queryClient.invalidateQueries({
-                queryKey: ["album-tracks", targetAlbum.id],
-            });
+            await reorderTracks.mutateAsync(nextIds);
 
             toast.success("Track order updated successfully.");
             onToggleEditOrder();
         } catch (error) {
             toast.error("Failed to update track order.");
-        } finally {
-            setSavingOrder(false);
-        }
+        } finally { setSavingOrder(false); }
     }
 
     async function handleDeleteTrack(trackId: string) {
         try {
-            await trackService.deleteTrack(trackId);
-
-            await queryClient.invalidateQueries({
-                queryKey: ["album-tracks", targetAlbum.id],
-            });
+            await deleteTrack.mutateAsync(trackId);
 
             toast.success("Track deleted successfully.");
         } catch {
