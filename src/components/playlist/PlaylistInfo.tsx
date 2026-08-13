@@ -1,14 +1,14 @@
 'use client'
 
-import { useEffect, useRef, useState } from "react";
+import { use, useState } from "react";
 import { playlistService } from "@/services/playlist.service";
 import { useRouter } from "next/navigation";
-import { Playlist } from "@/types/playlist";
 import { Settings } from 'lucide-react';
 import { useAuth } from '@/providers/AuthProvider';
 import { Dropdown, Button } from "@/components/ui";
 import PlaylistEditForm from "./PlaylistEditForm";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -16,22 +16,30 @@ interface Props {
 
 export default function PlaylistInfo({ params }: Props) {
     const { user } = useAuth();
-    const [playlist, setPlaylist] = useState<Playlist | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { id } = use(params);
+    const { data: playlist } = useQuery({
+        queryKey: queryKeys.playlist(id),
+        queryFn: async () => (await playlistService.getPlaylist(id)).data,
+    });
     const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
     const isOwner = playlist?.owner.id === user?.id;
     const router = useRouter();
     const queryClient = useQueryClient();
 
+    const deletePlaylist = useMutation({
+        mutationFn: playlistService.deletePlaylist,
+        onSuccess: async () => {
+            if (!playlist) return;
+            await queryClient.invalidateQueries({ queryKey: queryKeys.userPlaylists(playlist.owner.username) });
+            router.push(`/profile/${playlist.owner.username}`);
+        },
+    });
+
     async function handleDeletePlaylist() {
         if (!playlist) return;
 
         try {
-            await playlistService.deletePlaylist(playlist.id);
-            router.push(`/profile/${playlist?.owner.username}`);
-            queryClient.invalidateQueries({
-                queryKey: ["user-playlists", playlist?.owner.username],
-            });
+            await deletePlaylist.mutateAsync(playlist.id);
         } catch (error) {
             console.error("Error deleting playlist:", error);
         }
@@ -40,16 +48,6 @@ export default function PlaylistInfo({ params }: Props) {
     async function handleEditPlaylist() {
         setIsEditPopupOpen(true);
     }
-
-    useEffect(() => {
-        const fetchPlaylist = async () => {
-            const { id } = await params;
-            const response = await playlistService.getPlaylist(id);
-            setPlaylist(response.data);
-            setLoading(false);
-        };
-        fetchPlaylist();
-      }, [params]);
 
     async function handleOwnerClick() {
         router.push(`/profile/${playlist?.owner.username}`);

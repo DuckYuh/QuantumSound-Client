@@ -1,16 +1,16 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { albumService } from "@/services/album.service";
 import { useRouter } from "next/navigation";
-import { Album } from "@/types/album";
 import { useAuth } from "@/providers/AuthProvider";
 import { Button, Dropdown } from "@/components/ui";
 import { Settings } from 'lucide-react';
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import AddTrackForm from "./AddTrackForm";
 import AlbumEditForm from "./AlbumEditForm";
 import { cn } from "@/lib/utils";
+import { queryKeys } from "@/lib/query-keys";
 
 interface Props {
   targetAlbum: {
@@ -22,9 +22,12 @@ interface Props {
 
 export default function AlbumInfo({ targetAlbum, editingOrder, onToggleEditOrder }: Props) {
   const { user } = useAuth();
-  const [albumResponse, setAlbumResponse] = useState<Album | null>(null);
   const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
   const [isAddTrackPopupOpen, setIsAddTrackPopupOpen] = useState(false);
+  const { data: albumResponse, isLoading } = useQuery({
+    queryKey: queryKeys.album(targetAlbum.id),
+    queryFn: async () => (await albumService.getAlbumById(targetAlbum.id)).data,
+  });
   const isOwner = albumResponse?.artist.id === user?.id;
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -32,13 +35,14 @@ export default function AlbumInfo({ targetAlbum, editingOrder, onToggleEditOrder
 
   const isAddTrackDisabled = albumResponse?.type === "SINGLE" && albumResponse?.tracks.length >= 1;
 
-  useEffect(() => {
-    const fetchAlbum = async () => {
-      const response = await albumService.getAlbumById(targetAlbum.id);
-      setAlbumResponse(response.data);
-    };
-    fetchAlbum();
-  }, [targetAlbum.id]);
+  const deleteAlbum = useMutation({
+    mutationFn: albumService.deleteAlbum,
+    onSuccess: async () => {
+      if (!albumResponse) return;
+      await queryClient.invalidateQueries({ queryKey: queryKeys.userAlbums(albumResponse.artist.username) });
+      router.push(`/profile/${albumResponse.artist.username}`);
+    },
+  });
 
   async function handleArtistClick() {
     router.push(`/profile/${albumResponse?.artist.username}`);
@@ -54,17 +58,13 @@ export default function AlbumInfo({ targetAlbum, editingOrder, onToggleEditOrder
 
   async function handleDeleteAlbum(AlbumId: string) {
     try {
-      await albumService.deleteAlbum(AlbumId);
-      queryClient.invalidateQueries({
-        queryKey: ["user-albums", albumResponse?.artist.username],
-      });
-      router.push(`/profile/${albumResponse?.artist.username}`);
+      await deleteAlbum.mutateAsync(AlbumId);
     } catch (error) {
       console.error("Error deleting album:", error);
     }
   }
 
-  if (!albumResponse) return <div>Loading...</div>;
+  if (isLoading || !albumResponse) return <div>Loading...</div>;
 
   return (
     <>

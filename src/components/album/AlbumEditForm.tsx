@@ -6,7 +6,8 @@ import { albumService } from "@/services/album.service";
 import { toast } from "sonner";
 import { Album } from "@/types/album";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 type AlbumStatus = "PROCESSING" | "READY" | "BLOCKED" | "DELETED";
 
@@ -22,24 +23,32 @@ export default function AlbumEditForm({ albumId, open, onClose, onEdited }: Albu
     const [albumDescription, setAlbumDescription] = useState("");
     const [coverImage, setCoverImage] = useState<File | null>(null);
     const [status, setStatus] = useState<AlbumStatus>("PROCESSING");
-    const [submitting, setSubmitting] = useState(false);
-    const [album, setAlbum] = useState<Album | null>(null);
     const router = useRouter();
     const queryClient = useQueryClient();
+    const { data: album } = useQuery<Album>({
+        queryKey: queryKeys.album(albumId),
+        queryFn: async () => (await albumService.getAlbumById(albumId)).data,
+        enabled: open,
+    });
+    const updateAlbum = useMutation({
+        mutationFn: (data: Parameters<typeof albumService.updateAlbum>[1]) => albumService.updateAlbum(albumId, data),
+        onSuccess: async (response) => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: queryKeys.album(albumId) }),
+                album && queryClient.invalidateQueries({ queryKey: queryKeys.userAlbums(album.artist.username) }),
+            ]);
+            router.push(`/album/${response.data.slug}`);
+        },
+    });
 
     useEffect(() => {
         if (!open) return;
 
-        async function loadAlbum() {
-            const CurrentAlbum = await albumService.getAlbumById(albumId);
-            setAlbum(CurrentAlbum.data);
-            setAlbumName(album?.title || "");
-            setAlbumDescription(album?.description ?? "");
-            setStatus(album?.status || "READY");
-        }
-
-        loadAlbum();
-    }, [open, albumId, album?.title, album?.description, album?.status]);
+        if (!album) return;
+        setAlbumName(album.title);
+        setAlbumDescription(album.description ?? "");
+        setStatus(album.status || "READY");
+    }, [open, album]);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -50,9 +59,8 @@ export default function AlbumEditForm({ albumId, open, onClose, onEdited }: Albu
             return;
         }
 
-        setSubmitting(true);
         try {
-            const newAlbum = await albumService.updateAlbum(albumId, {
+            await updateAlbum.mutateAsync({
                 title,
                 description: albumDescription.trim() || undefined,
                 type: album?.type,
@@ -61,14 +69,8 @@ export default function AlbumEditForm({ albumId, open, onClose, onEdited }: Albu
             });
             toast.success("Album updated successfully.");
             onEdited?.();
-            queryClient.invalidateQueries({ 
-                queryKey: ["user-albums", album?.artist.username] 
-            });
-            router.push(`/album/${newAlbum.data.slug}`);
         } catch (error) {
             toast.error("Failed to update album.");
-        } finally {
-            setSubmitting(false);
         }
     }
 
@@ -149,7 +151,7 @@ export default function AlbumEditForm({ albumId, open, onClose, onEdited }: Albu
                         <Button type="button" variant="outline" onClick={onClose}>
                             Cancel
                         </Button>
-                        <Button type="submit" loading={submitting} disabled={!albumName.trim()} >
+                        <Button type="submit" loading={updateAlbum.isPending} disabled={!albumName.trim()} >
                             Confirm
                         </Button>
                     </div>

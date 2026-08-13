@@ -2,19 +2,26 @@
 
 import SearchItem from "./SearchItem";
 import { Card } from "@/components/ui";
-import { useState, useEffect } from "react";
+import { useDeferredValue, useState } from "react";
 import { searchService } from "@/services/search.service";
 import { SearchResult } from "@/types/search";
 import { useAudio } from "@/providers/AudioProvider";
 import { Track } from "@/types/track";
 import { useAuth } from "@/providers/AuthProvider";
 import AuthRequiredModal from "@/components/auth/AuthRequiredModal";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 export default function SearchDropdown({ query }: { query: string }) {
     const { playTrack } = useAudio();
-    const [results, setResults] = useState<SearchResult | null>(null);
     const [showAuthRequired, setShowAuthRequired] = useState(false);
     const { user, loading } = useAuth();
+    const deferredQuery = useDeferredValue(query.trim());
+    const { data: results } = useQuery<SearchResult>({
+        queryKey: queryKeys.search(deferredQuery, 10),
+        queryFn: async () => (await searchService.search(deferredQuery)).data,
+        enabled: Boolean(deferredQuery),
+    });
 
     function requireAuth(action: () => void) {
         if (loading) return;
@@ -26,33 +33,6 @@ export default function SearchDropdown({ query }: { query: string }) {
 
         action();
     }
-
-    useEffect(() => {
-        let isActive = true;
-
-        async function fetchResults() {
-            try {
-                const res = await searchService.search(query);
-                if (isActive) {
-                    setResults(res.data);
-                }
-            }
-            catch (error) {
-                console.error("Error fetching search results:", error);
-            }
-        }
-
-        const timer = setTimeout(() => {
-            if (!query.trim()) return;
-
-            fetchResults();
-        }, 300);
-
-        return () => {
-            isActive = false;
-            clearTimeout(timer);
-        };
-    }, [query]);
 
     const tracks = results?.tracks ?? [];
     const albums = results?.albums ?? [];

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useRef } from "react";
 import { albumService } from "@/services/album.service";
 import { Button, Loading, MediaCard } from "@/components/ui";
 import { Album } from "@/types/album";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 interface ProfileHeaderProps {
   targetUser: {
@@ -14,8 +16,10 @@ interface ProfileHeaderProps {
 }
 
 export default function ProfileMusics({ targetUser }: ProfileHeaderProps) {
-    const [userAlbums, setUserAlbums] = useState<Album[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { data: userAlbums = [], isLoading: loading } = useQuery<Album[]>({
+        queryKey: queryKeys.userAlbums(targetUser.username),
+        queryFn: async () => (await albumService.getUserAlbums(targetUser.username)).data,
+    });
     const scrollRef = useRef<HTMLDivElement>(null);
 
     const scroll = (direction: "left" | "right") => {
@@ -28,24 +32,6 @@ export default function ProfileMusics({ targetUser }: ProfileHeaderProps) {
     };
 
     const router = useRouter();
-
-    async function fetchUserAlbums() {
-        try {
-            setLoading(true);
-            const response = await albumService.getUserAlbums(targetUser.username);
-            setUserAlbums(response.data);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching user albums:", error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    useEffect(() => {
-        console.log("fetch albums");
-        fetchUserAlbums();
-    }, [targetUser.username]);
 
     if (loading) {
         return (

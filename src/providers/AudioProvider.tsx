@@ -156,7 +156,8 @@ export function AudioProvider({ children, }: { children: ReactNode; }) {
                 console.error("Failed to play audio:", error); 
                 setIsPlaying(false); 
             }); 
-    }, [queue]);
+    }, [queue, shuffle]);
+
     const pause = useCallback(() => {
         const audio = audioRef.current; 
         if (!audio) return;
