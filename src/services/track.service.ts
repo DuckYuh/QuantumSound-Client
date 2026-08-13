@@ -69,6 +69,26 @@ export const trackService = {
         return api.get(`/tracks/popular/${userId}`);
     },
 
+    likeTrack(trackId: string) {
+        return api.post(`/tracks/like/${trackId}`);
+    },
+
+    unlikeTrack(trackId: string) {
+        return api.delete(`/tracks/unlike/${trackId}`);
+    },
+
+    getIsLiked(trackId: string) {
+        return api.get(`/tracks/likes/${trackId}`);
+    },
+
+    getTrackComments(trackId: string) {
+        return api.get(`/tracks/comments/${trackId}`);
+    },
+
+    getCommentsCount(trackId: string) {
+        return api.get(`/tracks/comments/count/${trackId}`);
+    },
+
     findAlbumTracks(albumId: string) {
         return api.get(`/tracks/albums/${albumId}`);
     },
