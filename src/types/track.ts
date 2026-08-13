@@ -10,6 +10,7 @@ export interface Track {
   trackNumber: number | null;
   duration: number;
   playCount: number;
+  likeCount: number;
   genres: string[];
   tags: string[];
   albumId: string;

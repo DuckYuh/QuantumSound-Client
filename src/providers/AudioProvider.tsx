@@ -84,6 +84,12 @@ export function AudioProvider({ children, }: { children: ReactNode; }) {
             return;
         }
 
+        if (recordingListenRef.current) {
+            return;
+        }
+
+        recordingListenRef.current = true;
+
         try {
             await trackService.recordListen(trackId);
 
@@ -93,6 +99,8 @@ export function AudioProvider({ children, }: { children: ReactNode; }) {
                 "Failed to record listen:",
                 error
             );
+        } finally {
+            recordingListenRef.current = false;
         }
     };
 
