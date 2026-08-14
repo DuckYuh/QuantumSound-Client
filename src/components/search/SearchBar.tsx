@@ -19,6 +19,7 @@ export default function SearchBar() {
         }
 
         router.push(`/search?query=${encodeURIComponent(trimmedQuery)}`);
+        setQuery("");
     };
 
     return (
