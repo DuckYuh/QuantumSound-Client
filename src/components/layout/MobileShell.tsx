@@ -8,6 +8,7 @@ import { useState } from "react";
 
 export default function MobileShell({ children }: { children: React.ReactNode }) {
     const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+
     return (
         <div className="min-h-screen">
             <MobileHeader />

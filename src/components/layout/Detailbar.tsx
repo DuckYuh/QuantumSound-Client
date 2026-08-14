@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { trackService } from "@/services/track.service";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import CommentsPanel from "@/components/bar/CommentsPanel";
+import CommentsPanel from "@/components/comment/CommentsPanel";
 import { useAuth } from "@/providers/AuthProvider";
 
 type DetailbarProps = {

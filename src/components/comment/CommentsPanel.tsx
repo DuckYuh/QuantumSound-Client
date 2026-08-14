@@ -29,15 +29,11 @@ export default function CommentsPanel({
         try {
             setLoading(true);
 
-            const response =
-                await trackService.getTrackComments(trackId);
+            const response = await trackService.getTrackComments(trackId);
 
             setComments(response.data);
         } catch (error) {
-            console.error(
-                "Failed to fetch comments:",
-                error
-            );
+            console.error("Failed to fetch comments:", error);
         } finally {
             setLoading(false);
         }
