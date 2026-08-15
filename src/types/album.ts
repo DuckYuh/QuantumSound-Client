@@ -5,7 +5,7 @@ export interface Album {
   type: "ALBUM" | "SINGLE" | "EP";
   description?: string | null;
   coverImage?: string | null;
-  status: "PROCESSING" | "READY" | "BLOCKED" | "DELETED";
+  status: "PROCESSING" | "RELEASED" | "BLOCKED";
   artistId: string;
   createdAt: string;
   updatedAt: string;
@@ -33,7 +33,7 @@ export interface UpdateAlbumRequest {
   type?: "ALBUM" | "SINGLE" | "EP";
   description?: string | null;
   coverImage?: File;
-  status?: "PROCESSING" | "READY" | "BLOCKED" | "DELETED";
+  status?: "PROCESSING" | "RELEASED" | "BLOCKED";
 }
 
 export interface ReOrderAlbumTracksRequest {

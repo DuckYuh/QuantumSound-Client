@@ -55,13 +55,17 @@ export default function PopularTracks() {
             <h2 className="text-lg font-semibold">Popular Tracks</h2>
             <div className="flex flex-col">
                 {popularTracks.slice(0, visibleCount).map((track, index) => (
-                    <div key={track.id} className="group grid grid-cols-[32px_1fr_100px_80px] items-center gap-4 rounded-md px-2 py-2 hover:bg-surface-hover">
+                    <div 
+                        key={track.id} 
+                        className="group grid grid-cols-[1fr_auto] lg:grid-cols-[32px_1fr_100px_80px] lg:cursor-default items-center gap-3 lg:gap-4 rounded-md px-2 py-2 hover:bg-surface-hover cursor-pointer transition-colors"
+                        onClick={() => requireAuth(() => playTrack(track, popularTracks))}
+                    >
                         <button 
                             type="button" 
                             onClick={() =>
                                 requireAuth(() => playTrack(track, popularTracks))
                             } 
-                            className="flex h-8 w-8 items-center justify-center rounded-full" 
+                            className="h-8 w-8 items-center justify-center rounded-full hidden lg:flex" 
                             aria-label={`Play ${track.title}`} 
                         > 
                             <span className="text-sm text-muted-foreground group-hover:hidden"> 
@@ -86,12 +90,15 @@ export default function PopularTracks() {
                                 <p className="truncate text-sm text-muted-foreground"> {track.artist.displayName} </p> 
                             </div>
                         </div>
-                        <div className="text-sm text-muted-foreground"> 
+                        <div className="text-sm text-muted-foreground hidden lg:block"> 
                             <Eye className="size-4 inline-block mr-1" />
                             {track.playCount}
                         </div>
-                        <div className="flex items-center justify-end gap-3 justify-self-end"> 
-                            <span>{formatDuration(track.duration)}</span>
+                        <div 
+                            className="flex items-center justify-end gap-3 justify-self-end"
+                            onClick={(e) => e.stopPropagation()}    
+                        > 
+                            <span className="text-sm text-muted-foreground hidden lg:inline">{formatDuration(track.duration)}</span>
                             {user ? (
                                 <Dropdown
                                     className="bg-surface z-10"

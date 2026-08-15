@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Album } from "@/types/album";
 import { albumService } from "@/services/album.service";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 interface UploadedMusicSideListProps {
   targetUser: {
     username: string;
+    id: string;
   };
 }
 
@@ -18,9 +20,9 @@ export default function UploadedMusicSideList({ targetUser }: UploadedMusicSideL
     const router = useRouter();
 
     const {data: uploadedMusics = [], isLoading, error, } = useQuery<Album[]>({
-        queryKey: ["user-albums", targetUser.username],
+        queryKey: queryKeys.myAlbums(),
         queryFn: async () => {
-            const response = await albumService.getUserAlbums(targetUser.username);
+            const response = await albumService.getMyAlbums();
             return response.data;
         }
     });

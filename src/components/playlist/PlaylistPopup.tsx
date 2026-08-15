@@ -24,7 +24,7 @@ export default function PlaylistPopup({ open, onClose, onCreated }: PlaylistPopu
     const { user } = useAuth();
     const createPlaylist = useMutation({
         mutationFn: playlistService.createPlaylist,
-        onSuccess: () => user && queryClient.invalidateQueries({ queryKey: queryKeys.userPlaylists(user.username) }),
+        onSuccess: () => user && queryClient.invalidateQueries({ queryKey: queryKeys.myPlaylists() }),
     });
 
     useEffect(() => {

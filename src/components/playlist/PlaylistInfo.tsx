@@ -1,37 +1,53 @@
-'use client'
+"use client";
 
 import { use, useState } from "react";
 import { playlistService } from "@/services/playlist.service";
 import { useRouter } from "next/navigation";
-import { Settings } from 'lucide-react';
-import { useAuth } from '@/providers/AuthProvider';
+import { Settings } from "lucide-react";
+import { useAuth } from "@/providers/AuthProvider";
 import { Dropdown, Button } from "@/components/ui";
 import PlaylistEditForm from "./PlaylistEditForm";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 
 interface Props {
-  params: Promise<{ id: string }>;
+    params: Promise<{ id: string }>;
 }
 
 export default function PlaylistInfo({ params }: Props) {
     const { user } = useAuth();
     const { id } = use(params);
-    const { data: playlist } = useQuery({
-        queryKey: queryKeys.playlist(id),
-        queryFn: async () => (await playlistService.getPlaylist(id)).data,
-    });
+
     const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
-    const isOwner = playlist?.owner.id === user?.id;
+
     const router = useRouter();
     const queryClient = useQueryClient();
 
+    const { data: playlist } = useQuery({
+        queryKey: queryKeys.playlist(id),
+        queryFn: async () =>
+            (await playlistService.getPlaylist(id)).data,
+    });
+
+    const isOwner = playlist?.owner.id === user?.id;
+
     const deletePlaylist = useMutation({
         mutationFn: playlistService.deletePlaylist,
+
         onSuccess: async () => {
             if (!playlist) return;
-            await queryClient.invalidateQueries({ queryKey: queryKeys.userPlaylists(playlist.owner.username) });
-            router.push(`/profile/${playlist.owner.username}`);
+
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.myPlaylists(),
+            });
+
+            router.push(
+                `/profile/${playlist.owner.username}`
+            );
         },
     });
 
@@ -41,16 +57,23 @@ export default function PlaylistInfo({ params }: Props) {
         try {
             await deletePlaylist.mutateAsync(playlist.id);
         } catch (error) {
-            console.error("Error deleting playlist:", error);
+            console.error(
+                "Error deleting playlist:",
+                error
+            );
         }
     }
 
-    async function handleEditPlaylist() {
+    function handleEditPlaylist() {
         setIsEditPopupOpen(true);
     }
 
-    async function handleOwnerClick() {
-        router.push(`/profile/${playlist?.owner.username}`);
+    function handleOwnerClick() {
+        if (!playlist) return;
+
+        router.push(
+            `/profile/${playlist.owner.username}`
+        );
     }
 
     if (!playlist) {
@@ -59,57 +82,167 @@ export default function PlaylistInfo({ params }: Props) {
 
     return (
         <>
-            <div className="relative bg-gradient-to-b from-[#222228] to-[#18181b] px-6 pt-6 pb-6 flex flex-col md:flex-row items-center gap-8">
-                <div className="w-44 h-auto rounded-lg aspect-square object-cover transition group-hover:scale-[1.03]">
+            <div
+                className="
+                    relative
+                    flex flex-col items-center
+                    gap-5
+                    overflow-hidden
+                    bg-gradient-to-b from-[#222228] to-[#18181b]
+                    px-4 py-6
+
+                    sm:px-6 sm:py-7
+
+                    md:flex-row
+                    md:items-end
+                    md:gap-7
+                    md:px-8 md:py-8
+                "
+            >
+                {/* Cover */}
+                <div
+                    className="
+                        relative
+                        size-40 shrink-0
+                        overflow-hidden
+                        rounded-xl
+                        shadow-xl
+
+                        sm:size-44
+
+                        md:size-52
+                        lg:size-60
+                    "
+                >
                     <img
-                        src={playlist.coverImage ?? "/Logo512x512.png"}
+                        src={
+                            playlist.coverImage ??
+                            "/Logo512x512.png"
+                        }
                         alt={playlist.title}
-                        className="w-full h-full rounded-lg aspect-square object-cover transition group-hover:scale-[1.03]"
+                        className="h-full w-full object-cover"
                     />
                 </div>
-                <div className="flex flex-col items-center md:items-start flex-1 w-full text-center md:text-left">
-                    <div className="absolute top-6 text-md text-color-foreground">
+
+                {/* Playlist information */}
+                <div
+                    className="
+                        flex min-w-0 w-full
+                        flex-col items-center
+                        text-center
+
+                        md:items-start
+                        md:text-left
+                    "
+                >
+                    {/* Type */}
+                    <span
+                        className="
+                            mb-2
+                            text-xs font-bold uppercase
+                            tracking-[0.18em]
+                            text-muted-foreground
+
+                            md:text-sm
+                        "
+                    >
                         PLAYLIST
-                    </div>
-                    <div className="text-8xl font-bold line-clamp-2">
+                    </span>
+
+                    {/* Title */}
+                    <h1
+                        className="
+                            max-w-full
+                            line-clamp-2
+                            font-black
+                            leading-[0.95]
+                            tracking-tight
+
+                            text-3xl
+
+                            sm:text-4xl
+
+                            md:text-6xl
+
+                            lg:text-7xl
+                        "
+                    >
                         {playlist.title}
-                    </div>
-                    <div className="absolute bottom-6 text-md text-color-foreground hover:underline" onClick={handleOwnerClick} style={{ cursor: "pointer" }}>
+                    </h1>
+
+                    {/* Owner */}
+                    <button
+                        type="button"
+                        onClick={handleOwnerClick}
+                        className="
+                            mt-3
+                            max-w-full
+                            truncate
+                            text-sm font-medium
+                            text-muted-foreground
+                            transition-colors
+                            hover:text-foreground
+                            hover:underline
+
+                            md:mt-4
+                            md:text-base
+                        "
+                    >
                         {playlist.owner.displayName}
-                    </div>
+                    </button>
                 </div>
+
+                {/* Settings */}
                 {isOwner && (
-                    <div className="absolute top-6 right-6 z-10">
-                        <Dropdown 
-                            className="bg-surface"
+                    <div
+                        className="
+                            absolute
+                            right-3 top-3
+
+                            sm:right-5 sm:top-5
+
+                            md:right-6 md:top-6
+                        "
+                    >
+                        <Dropdown
+                            className="z-20 bg-surface"
                             trigger={
-                                <Button variant="outline" size="sm">
-                                    <Settings className="w-6 h-6" />
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    aria-label="Playlist settings"
+                                >
+                                    <Settings className="size-5 md:size-6" />
                                 </Button>
                             }
                             items={[
                                 {
                                     label: "Edit Playlist",
-                                    onClick: handleEditPlaylist,
+                                    onClick:
+                                        handleEditPlaylist,
                                 },
                                 {
                                     label: "Delete Playlist",
-                                    onClick: handleDeletePlaylist,
+                                    onClick:
+                                        handleDeletePlaylist,
                                 },
                             ]}
                         />
                     </div>
                 )}
             </div>
+
             <PlaylistEditForm
                 playlistId={playlist.id}
                 open={isEditPopupOpen}
-                onClose={() => setIsEditPopupOpen(false)}
+                onClose={() =>
+                    setIsEditPopupOpen(false)
+                }
                 onEdited={() => {
                     setIsEditPopupOpen(false);
                     router.refresh();
                 }}
             />
         </>
-    )
+    );
 }
