@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export interface Track {
   id: string;
   title: string;
@@ -6,7 +8,7 @@ export interface Track {
   description?: string | null;
   coverImage?: string | null;
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
-  status: "PROCESSING" | "READY" | "BLOCKED" | "DELETED";
+  status: "PROCESSING" | "RELEASED" | "BLOCKED";
   trackNumber: number | null;
   duration: number;
   playCount: number;
@@ -56,7 +58,15 @@ export interface UpdateTrackRequest {
   description?: string | null;
   coverImage?: File;
   visibility?: "PUBLIC" | "PRIVATE" | "UNLISTED";
-  status?: "PROCESSING" | "READY" | "BLOCKED" | "DELETED";
+  status?: "PROCESSING" | "RELEASED" | "BLOCKED";
   genres?: string[];
   tags?: string[];
+}
+
+export interface TrackLike {
+    id: string;
+    userId: string;
+    trackId: string;
+    track: Track;
+    user: User;
 }

@@ -46,6 +46,10 @@ export const playlistService = {
         return api.get(`/playlists/user/${username}`);
     },
 
+    getMyPlaylists() {
+        return api.get("/playlists/my-playlists");
+    },
+
     getPlaylist(playlistId: string) {
         return api.get(`/playlists/${playlistId}`);
     }

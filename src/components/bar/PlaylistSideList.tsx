@@ -6,11 +6,13 @@ import { playlistService } from "@/services/playlist.service";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 interface PlaylistSideListProps {
-  targetUser: {
-    username: string;
-  };
+    targetUser: {
+        username: string;
+        id: string;
+    };
 }
 
 export default function PlaylistSideList({ targetUser }: PlaylistSideListProps) {
@@ -18,9 +20,9 @@ export default function PlaylistSideList({ targetUser }: PlaylistSideListProps) 
     const router = useRouter();
 
     const {data: playlists = [], isLoading, error, } = useQuery<Playlist[]>({
-        queryKey: ["user-playlists", targetUser.username],
+        queryKey: queryKeys.myPlaylists(),
         queryFn: async () => {
-            const res = await playlistService.getUserPlaylists(targetUser.username);
+            const res = await playlistService.getMyPlaylists();
             return res.data;
         },
     });

@@ -81,6 +81,10 @@ export const trackService = {
         return api.get(`/tracks/likes/${trackId}`);
     },
 
+    getLikedTracks() {
+        return api.get(`/tracks/liked`);
+    },
+
     getTrackComments(trackId: string) {
         return api.get(`/tracks/comments/${trackId}`);
     },

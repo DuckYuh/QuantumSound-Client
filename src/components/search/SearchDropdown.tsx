@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import SearchItem from "./SearchItem";
 import { Card } from "@/components/ui";
@@ -12,7 +12,12 @@ import AuthRequiredModal from "@/components/auth/AuthRequiredModal";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 
-export default function SearchDropdown({ query }: { query: string }) {
+type SearchDropdownProps = {
+    query: string;
+    onQueryChangeAction?: (newQuery: string) => void;
+};
+
+export default function SearchDropdown({ query, onQueryChangeAction }: SearchDropdownProps) {
     const { playTrack } = useAudio();
     const [showAuthRequired, setShowAuthRequired] = useState(false);
     const { user, loading } = useAuth();
@@ -32,6 +37,30 @@ export default function SearchDropdown({ query }: { query: string }) {
         }
 
         action();
+    }
+
+    async function handleItemClick(itemType: "track" | "album" | "artist", itemId: string) {
+        if (itemType === "track") {
+            const track = results?.tracks.find((t) => t.id === itemId);
+            if (track) {
+                requireAuth(() => playTrack(track as Track));
+                onQueryChangeAction?.("");
+            }
+        } else if (itemType === "album") {
+            requireAuth(() => {
+                if (user) {
+                    window.location.href = `/album/${itemId}`;
+                    onQueryChangeAction?.("");
+                }
+            });
+        } else if (itemType === "artist") {
+            requireAuth(() => {
+                if (user) {
+                    window.location.href = `/profile/${itemId}`;
+                    onQueryChangeAction?.("");
+                }
+            });
+        }
     }
 
     const tracks = results?.tracks ?? [];
@@ -54,9 +83,7 @@ export default function SearchDropdown({ query }: { query: string }) {
                                 {tracks.map((track) => (
                                     <SearchItem
                                         key={track.id}
-                                        onClick={() =>
-                                            requireAuth(() => playTrack(track as Track))
-                                        }
+                                        onClick={() => handleItemClick("track", track.id)}
                                         title={track.title}
                                         image={track.album.coverImage ?? "/Logo512x512.png"}
                                         subtitle={`${track.artist.displayName} • ${track.album.title}`}
@@ -72,7 +99,7 @@ export default function SearchDropdown({ query }: { query: string }) {
                                     <SearchItem
                                         key={album.id}
                                         href={user ? `/album/${album.slug}` : undefined}
-                                        onClick={() => requireAuth(() => undefined)}
+                                        onClick={() => handleItemClick("album", album.id)}
                                         title={album.title}
                                         image={album.coverImage ?? "/Logo512x512.png"}
                                         subtitle={`${album.artist.displayName} • ${album.type}`}
@@ -88,7 +115,7 @@ export default function SearchDropdown({ query }: { query: string }) {
                                     <SearchItem
                                         key={artist.id}
                                         href={user ? `/profile/${artist.username}` : undefined}
-                                        onClick={() => requireAuth(() => undefined)}
+                                        onClick={() => handleItemClick("artist", artist.id)}
                                         title={artist.displayName}
                                         image={artist.avatar ?? "/Logo512x512.png"}
                                         subtitle={`@${artist.username}`}

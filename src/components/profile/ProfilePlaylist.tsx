@@ -90,7 +90,7 @@ export default function ProfilePlaylists({ targetUser }: ProfileHeaderProps) {
                     {userPlaylists.map(playlist => (
                         <MediaCard
                             key={playlist.id}
-                            type={"playlist"}
+                            type={"PLAYLIST"}
                             cover={playlist.coverImage ?? "/Logo512x512.png"}
                             title={playlist.title}
                             onClick={() => router.push(`/playlist/${playlist.id}`)}

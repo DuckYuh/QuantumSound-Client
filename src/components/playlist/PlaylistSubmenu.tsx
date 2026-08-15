@@ -18,8 +18,8 @@ export function PlaylistSubmenu({ trackId }: Props) {
     const { user, loading } = useAuth();
     const queryClient = useQueryClient();
     const { data: playlists = [] } = useQuery<Playlist[]>({
-        queryKey: queryKeys.userPlaylists(user?.username ?? ""),
-        queryFn: async () => (await playlistService.getUserPlaylists(user!.username)).data,
+        queryKey: queryKeys.myPlaylists(),
+        queryFn: async () => (await playlistService.getMyPlaylists()).data,
         enabled: Boolean(user) && !loading,
     });
     const addTrack = useMutation({

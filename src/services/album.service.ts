@@ -48,6 +48,10 @@ export const albumService = {
         return api.get(`/albums/users/${username}`);
     },
 
+    getMyAlbums() {
+        return api.get("/albums/my-albums");
+    },
+
     getAlbumById(albumId: string) {
         return api.get(`/albums/${albumId}`);
     },

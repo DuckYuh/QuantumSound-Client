@@ -143,15 +143,25 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
                     </div>
                 </div>
             )}
-            <div className="grid grid-cols-[48px_minmax(0,1fr)_auto_auto] items-center p-2 border-b border-gray-700">
-                <span className="font-bold text-center">#</span>
+            <div className="grid grid-cols-[1fr_auto] lg:grid-cols-[48px_minmax(0,1fr)_auto_auto] items-center p-2 border-b border-gray-700">
+                <span className="font-bold text-center hidden lg:inline">
+                    #
+                </span>
                 <span className="font-bold">Track</span>
-                <span className="font-bold justify-self-end pr-4 text-right">Plays</span>
-                <span className="font-bold text-right pr-6">Duration</span>
+                <span className="font-bold justify-self-end pr-4 text-right hidden lg:inline">
+                    Plays
+                </span>
+                <span className="font-bold text-right pr-6 hidden lg:inline">
+                    Duration
+                </span>
             </div>
             {(editingOrder ? orderedTracks : tracks).map((track, index) => (
-                <div key={track.id} className="group grid grid-cols-[48px_minmax(0,1fr)_auto_auto] items-center p-2 hover:bg-surface-hover">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg justify-self-center">
+                <div 
+                    key={track.id} 
+                    onClick={() => playTrack(track, tracks)}
+                    className="group grid grid-cols-[1fr_auto] lg:grid-cols-[48px_minmax(0,1fr)_auto_auto] items-center p-2 hover:bg-surface-hover lg:cursor-default"
+                >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg justify-self-center hidden lg:flex">
                         <div className="flex h-4 w-4 items-center justify-center">
                             {editingOrder ? (
                                 <span>{index + 1}</span>
@@ -169,11 +179,14 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
                         </div>
                     </div>
                     <span className="truncate">{track.title}</span>
-                    <div className="text-muted-foreground text-sm justify-self-end pr-10 text-right">
+                    <div className="text-muted-foreground text-sm justify-self-end pr-10 text-right hidden lg:inline-flex">
                         {track.playCount}
                     </div>
-                    <div className="flex items-center justify-end gap-3 justify-self-end">
-                        <span className="text-right tabular-nums">
+                    <div 
+                        className="flex items-center justify-end gap-3 justify-self-end"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <span className="text-right tabular-nums hidden lg:inline">
                             {track.duration && formatDuration(track.duration)}
                         </span>
                         {editingOrder ? (

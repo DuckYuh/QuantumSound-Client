@@ -30,7 +30,7 @@ export default function SearchBar() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
             />
-            {query && <SearchDropdown query={query} />}
+            {query && <SearchDropdown query={query} onQueryChangeAction={setQuery} />}
         </form>
     );
 }
