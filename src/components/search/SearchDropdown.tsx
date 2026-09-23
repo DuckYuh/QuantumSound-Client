@@ -18,13 +18,15 @@ type SearchDropdownProps = {
 };
 
 export default function SearchDropdown({ query, onQueryChangeAction }: SearchDropdownProps) {
+    const SEARCH_LIMIT = 3;
     const { playTrack } = useAudio();
     const [showAuthRequired, setShowAuthRequired] = useState(false);
     const { user, loading } = useAuth();
     const deferredQuery = useDeferredValue(query.trim());
     const { data: results } = useQuery<SearchResult>({
-        queryKey: queryKeys.search(deferredQuery, 10),
-        queryFn: async () => (await searchService.search(deferredQuery)).data,
+        queryKey: queryKeys.search(deferredQuery, SEARCH_LIMIT),
+        queryFn: async () =>
+            (await searchService.search(deferredQuery, SEARCH_LIMIT)).data,
         enabled: Boolean(deferredQuery),
     });
 
@@ -63,9 +65,9 @@ export default function SearchDropdown({ query, onQueryChangeAction }: SearchDro
         }
     }
 
-    const tracks = results?.tracks ?? [];
-    const albums = results?.albums ?? [];
-    const artists = results?.users ?? [];
+    const tracks = (results?.tracks ?? []).slice(0, SEARCH_LIMIT);
+    const albums = (results?.albums ?? []).slice(0, SEARCH_LIMIT);
+    const artists = (results?.users ?? []).slice(0, SEARCH_LIMIT);
 
     const hasResults = tracks.length > 0 || albums.length > 0 || artists.length > 0;
 

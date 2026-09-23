@@ -35,6 +35,9 @@ export const trackService = {
         if (data.description !== undefined) {
             formData.append("description", data.description ?? "");
         }
+        if (data.audio) {
+            formData.append("audio", data.audio);
+        }
         if (data.coverImage) {
             formData.append("coverImage", data.coverImage);
         }
