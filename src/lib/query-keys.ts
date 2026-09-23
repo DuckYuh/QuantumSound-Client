@@ -10,4 +10,16 @@ export const queryKeys = {
   userPlaylists: (username: string) => ["user-playlists", username] as const,
   popularTracks: (userId: string) => ["popular-tracks", userId] as const,
   search: (query: string, limit: number) => ["search", query, limit] as const,
+  admin: {
+    users: () => ["admin", "users"] as const,
+    user: (id: string) => ["admin", "users", id] as const,
+    tracks: () => ["admin", "tracks"] as const,
+    track: (id: string) => ["admin", "tracks", id] as const,
+    albums: () => ["admin", "albums"] as const,
+    album: (id: string) => ["admin", "albums", id] as const,
+    genres: () => ["admin", "genres"] as const,
+    genre: (id: string) => ["admin", "genres", id] as const,
+    tags: () => ["admin", "tags"] as const,
+    tag: (id: string) => ["admin", "tags", id] as const,
+  },
 };

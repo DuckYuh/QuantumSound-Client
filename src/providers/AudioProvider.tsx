@@ -40,6 +40,10 @@ interface AudioContextType {
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
+function isPlayInterruptedError(error: unknown) {
+    return error instanceof DOMException && error.name === "AbortError";
+}
+
 export function AudioProvider({ children, }: { children: ReactNode; }) {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
@@ -153,7 +157,9 @@ export function AudioProvider({ children, }: { children: ReactNode; }) {
                 setIsPlaying(true); 
             }) 
             .catch((error) => { 
-                console.error("Failed to play audio:", error); 
+                if (!isPlayInterruptedError(error)) {
+                    console.error("Failed to play audio:", error);
+                }
                 setIsPlaying(false); 
             }); 
     }, [queue, shuffle]);
@@ -173,7 +179,9 @@ export function AudioProvider({ children, }: { children: ReactNode; }) {
             .then(() => { 
                 setIsPlaying(true); 
             }) .catch((error) => { 
-                console.error("Failed to resume audio:", error); 
+                if (!isPlayInterruptedError(error)) {
+                    console.error("Failed to resume audio:", error);
+                }
                 setIsPlaying(false); 
             });
     }, [currentTrack]);

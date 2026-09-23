@@ -7,7 +7,7 @@ export interface User {
     bio: string | null;
     country: string | null;
     role: "USER" | "ADMIN";
-    status: "ACTIVE" | "BANNED";
+    status: "ACTIVE" | "BANNED" | "DELETED";
     createdAt: string;
     updatedAt: string;
 }
@@ -23,4 +23,12 @@ export interface UpdateUserDto {
 export interface ChangePasswordDto {
     oldPassword: string;
     newPassword: string;
+}
+
+export interface AdminUpdateUserStatus {
+    status: "ACTIVE" | "BANNED";
+}
+
+export interface AdminUpdateUserRole {
+    role: "USER" | "ADMIN";
 }

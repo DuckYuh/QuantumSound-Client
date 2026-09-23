@@ -93,12 +93,12 @@ export default function AddTrackForm({ albumId, open, onClose, onSubmit }: Album
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 px-4 py-6 backdrop-blur-sm"
             role="presentation"
             onClick={onClose}
         >
             <div
-                className="w-full max-w-3xl rounded-3xl border border-border bg-background p-6 shadow-2xl space-y-4 overflow-y-auto max-h-[60vh]"
+                className="w-full max-w-3xl rounded-3xl border border-border bg-background p-6 shadow-2xl space-y-4 overflow-y-auto max-h-[100vh]"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="add-track-title"

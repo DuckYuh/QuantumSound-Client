@@ -87,7 +87,7 @@ export default function AlbumEditForm({ albumId, open, onClose, onEdited, }: Alb
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm pb-16 sm:items-center sm:px-4 sm:py-6"
+            className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm pb-16 sm:items-center sm:px-4 sm:py-6"
             role="presentation"
             onClick={onClose}
         >

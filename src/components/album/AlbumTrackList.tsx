@@ -9,6 +9,7 @@ import { Track } from "@/types/track";
 import { ArrowDown, ArrowUp, Play, EllipsisVertical } from "lucide-react";
 import { Button, Dropdown } from "@/components/ui";
 import { PlaylistSubmenu } from "@/components/playlist/PlaylistSubmenu";
+import EditTrackForm from "./EditTrackForm";
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
@@ -29,6 +30,7 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
 
     const [orderedTracks, setOrderedTracks] = useState<Track[]>([]);
     const [savingOrder, setSavingOrder] = useState(false);
+    const [editingTrack, setEditingTrack] = useState<Track | null>(null);
 
     const queryClient = useQueryClient();
 
@@ -53,6 +55,8 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
 
     useEffect(() => {
         if (!editingOrder) {
+            // Keep the draft order aligned while reorder mode is closed.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setOrderedTracks(tracks);
         }
     }, [tracks, editingOrder]);
@@ -104,7 +108,7 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
 
             toast.success("Track order updated successfully.");
             onToggleEditOrder();
-        } catch (error) {
+        } catch {
             toast.error("Failed to update track order.");
         } finally { setSavingOrder(false); }
     }
@@ -235,6 +239,7 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
                                     ...(isOwner ? [
                                         {
                                             label: "Edit Track",
+                                            onClick: () => setEditingTrack(track),
                                         }
                                     ] : []),
                                     ...(isOwner ? [
@@ -249,6 +254,13 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
                     </div>
                 </div>
             ))}
+            <EditTrackForm
+                key={editingTrack?.id ?? "closed"}
+                track={editingTrack}
+                open={editingTrack !== null}
+                onClose={() => setEditingTrack(null)}
+                onEdited={() => setEditingTrack(null)}
+            />
         </div>
     );
 }

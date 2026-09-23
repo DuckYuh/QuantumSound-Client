@@ -39,3 +39,15 @@ export interface UpdateAlbumRequest {
 export interface ReOrderAlbumTracksRequest {
   trackIds: string[];
 }
+
+export interface AdminAlbumQuery {
+  search?: string;
+  status?: "PROCESSING" | "RELEASED" | "BLOCKED";
+  type?: "ALBUM" | "SINGLE" | "EP";
+  page?: number;
+  limit?: number;
+}
+
+export interface AdminUpdateAlbumStatus {
+  status: "PROCESSING" | "RELEASED" | "BLOCKED";
+}

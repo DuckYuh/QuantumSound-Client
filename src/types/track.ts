@@ -56,6 +56,7 @@ export interface TrackFormData {
 export interface UpdateTrackRequest {
   title?: string;
   description?: string | null;
+  audio?: File;
   coverImage?: File;
   visibility?: "PUBLIC" | "PRIVATE" | "UNLISTED";
   status?: "PROCESSING" | "RELEASED" | "BLOCKED";
@@ -69,4 +70,16 @@ export interface TrackLike {
     trackId: string;
     track: Track;
     user: User;
+}
+
+export interface AdminTrackQuery {
+    search?: string;
+    status?: "PROCESSING" | "RELEASED" | "BLOCKED";
+    artistId?: string;
+    page?: number;
+    limit?: number;
+}
+
+export interface AdminUpdateTrackStatus {
+    status: "PROCESSING" | "RELEASED" | "BLOCKED";
 }
