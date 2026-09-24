@@ -55,83 +55,31 @@ export default function MostLikedTracks() {
             <h2 className="text-lg font-semibold">Most Liked Tracks</h2>
             <div className="flex flex-col">
                 {mostLikedTracks.slice(0, visibleCount).map((track, index) => (
-                    <div 
+                    <Dropdown
                         key={track.id} 
-                        className="group grid grid-cols-[1fr_auto] lg:grid-cols-[32px_1fr_100px_80px] lg:cursor-default items-center gap-3 lg:gap-4 rounded-md px-2 py-2 hover:bg-surface-hover cursor-pointer transition-colors"
-                        onClick={() => requireAuth(() => playTrack(track, mostLikedTracks))}
-                    >
-                        <button 
-                            type="button" 
-                            onClick={() =>
-                                requireAuth(() => playTrack(track, mostLikedTracks))
-                            } 
-                            className="flex h-8 w-8 items-center justify-center rounded-full hidden lg:flex" 
-                            aria-label={`Play ${track.title}`} 
-                        > 
-                            <span className="text-sm text-muted-foreground group-hover:hidden"> 
-                                {index + 1} 
-                            </span> 
-                            <Play 
-                                size={16} 
-                                fill="currentColor" 
-                                className="hidden group-hover:block" 
-                            /> 
-                        </button>
-                        <div className="flex min-w-0 items-center gap-3"> 
-                            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md"> 
-                                <img 
-                                    src={ track.album.coverImage ?? "/Logo512x512.png" } 
-                                    alt={track.title} 
-                                    className="h-full w-full object-cover" 
-                                /> 
-                            </div> 
-                            <div className="min-w-0"> 
-                                <p className="truncate font-medium"> {track.title} </p> 
-                                <p className="truncate text-sm text-muted-foreground"> {track.artist.displayName} </p> 
+                        className="bg-surface z-10"
+                        portal
+                        openOnContextMenu
+                        triggerClassName="block w-full"
+                        trigger={
+                            <div className="group grid grid-cols-[1fr_auto] lg:grid-cols-[32px_1fr_100px_80px] lg:cursor-default items-center gap-3 lg:gap-4 rounded-md px-2 py-2 hover:bg-surface-hover cursor-pointer transition-colors" onClick={() => requireAuth(() => playTrack(track, mostLikedTracks))}>
+                                <button type="button" onClick={() => requireAuth(() => playTrack(track, mostLikedTracks))} className="flex h-8 w-8 items-center justify-center rounded-full hidden lg:flex" aria-label={`Play ${track.title}`}>
+                                    <span className="text-sm text-muted-foreground group-hover:hidden">{index + 1}</span>
+                                    <Play size={16} fill="currentColor" className="hidden group-hover:block" />
+                                </button>
+                                <div className="flex min-w-0 items-center gap-3">
+                                    <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md"><img src={track.album.coverImage ?? "/Logo512x512.png"} alt={track.title} className="h-full w-full object-cover" /></div>
+                                    <div className="min-w-0"><p className="truncate font-medium">{track.title}</p><p className="truncate text-sm text-muted-foreground">{track.artist.displayName}</p></div>
+                                </div>
+                                <div className="text-sm text-muted-foreground hidden lg:block"><Heart className="size-4 inline-block mr-1" />{track.likeCount}</div>
+                                <div className="flex items-center justify-end gap-3 justify-self-end" onClick={(e) => e.stopPropagation()}>
+                                    <span className="text-sm text-muted-foreground hidden lg:inline">{formatDuration(track.duration)}</span>
+                                    {user ? <Dropdown className="bg-surface z-10" placement="top" portal trigger={<Button size="sm" variant="ghost" className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><EllipsisVertical className="size-4" /></Button>} items={[{ label: "Add to Playlist", submenu: <PlaylistSubmenu trackId={track.id} /> }]} /> : <Button size="sm" variant="ghost" className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" onClick={() => requireAuth(() => undefined)} aria-label="Open track actions"><EllipsisVertical className="size-4" /></Button>}
+                                </div>
                             </div>
-                        </div>
-                        <div className="text-sm text-muted-foreground hidden lg:block"> 
-                            <Heart className="size-4 inline-block mr-1" />
-                            {track.likeCount}
-                        </div>
-                        <div 
-                            className="flex items-center justify-end gap-3 justify-self-end"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <span className="text-sm text-muted-foreground hidden lg:inline">{formatDuration(track.duration)}</span>
-                            {user ? (
-                                <Dropdown
-                                    className="bg-surface z-10"
-                                    placement="top"
-                                    trigger={
-                                        <Button size="sm" variant="ghost" className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-                                            <EllipsisVertical className="size-4" />
-                                        </Button>
-                                    }
-                                    items={[
-                                        {
-                                            label: "Add to Playlist",
-                                            submenu: (
-                                                <PlaylistSubmenu
-                                                    trackId={track.id}
-                                                />
-                                            ),
-                                        },
-                                    ]}
-                                />
-                            ) : (
-                                <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                    onClick={() => requireAuth(() => undefined)}
-                                    aria-label="Open track actions"
-                                >
-                                    <EllipsisVertical className="size-4" />
-                                </Button>
-                            )}
-                        </div>
-                    </div>
+                        }
+                        items={[{ label: "Add to Playlist", submenu: <PlaylistSubmenu trackId={track.id} /> }]}
+                    />
                 ))}
             </div>
             {visibleCount < mostLikedTracks.length && (

@@ -160,11 +160,17 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
                 </span>
             </div>
             {(editingOrder ? orderedTracks : tracks).map((track, index) => (
-                <div 
+                <Dropdown
                     key={track.id} 
-                    onClick={() => playTrack(track, tracks)}
-                    className="group grid grid-cols-[1fr_auto] lg:grid-cols-[48px_minmax(0,1fr)_auto_auto] items-center p-2 hover:bg-surface-hover lg:cursor-default"
-                >
+                    className="bg-surface z-10"
+                    portal
+                    openOnContextMenu={!editingOrder}
+                    triggerClassName="block w-full"
+                    trigger={
+                        <div 
+                            onClick={() => playTrack(track, tracks)}
+                            className="group grid grid-cols-[1fr_auto] lg:grid-cols-[48px_minmax(0,1fr)_auto_auto] items-center p-2 hover:bg-surface-hover lg:cursor-default"
+                        >
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg justify-self-center hidden lg:flex">
                         <div className="flex h-4 w-4 items-center justify-center">
                             {editingOrder ? (
@@ -222,6 +228,7 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
                             <Dropdown
                                 className="bg-surface z-10"
                                 placement="top"
+                                portal
                                 trigger={
                                     <Button size="sm" variant="ghost" className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
                                         <EllipsisVertical className="size-4" />
@@ -252,7 +259,14 @@ export default function AlbumTrackList({ targetAlbum, editingOrder, onToggleEdit
                             />
                         )}
                     </div>
-                </div>
+                        </div>
+                    }
+                    items={[
+                        { label: "Add to Playlist", submenu: <PlaylistSubmenu trackId={track.id} /> },
+                        ...(isOwner ? [{ label: "Edit Track", onClick: () => setEditingTrack(track) }] : []),
+                        ...(isOwner ? [{ label: "Delete Track", onClick: () => handleDeleteTrack(track.id) }] : []),
+                    ]}
+                />
             ))}
             <EditTrackForm
                 key={editingTrack?.id ?? "closed"}
