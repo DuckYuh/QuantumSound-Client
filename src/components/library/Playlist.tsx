@@ -72,7 +72,7 @@ export default function Playlist() {
                             type={"PLAYLIST"}
                             cover={playlist.coverImage ?? "/Logo512x512.png"}
                             title={playlist.title}
-                            onClick={() => router.push(`/playlist/${playlist.id}`)}
+                            onClick={() => router.push(`/playlist?id=${encodeURIComponent(playlist.id)}`)}
                         />
                     ))
                 )}

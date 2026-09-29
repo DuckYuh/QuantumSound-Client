@@ -30,7 +30,7 @@ export default function UploadedMusicSideList({ targetUser }: UploadedMusicSideL
     const displayedMusics = showAll ? uploadedMusics : uploadedMusics.slice(0, 3);
 
     async function onAlbumClick(slug: string) {
-        router.push(`/album/${slug}`);
+        router.push(`/album?slug=${encodeURIComponent(slug)}`);
     }
 
     if (isLoading) {

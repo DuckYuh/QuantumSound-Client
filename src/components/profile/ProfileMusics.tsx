@@ -77,7 +77,7 @@ export default function ProfileMusics({ targetUser }: ProfileHeaderProps) {
                         type={album.type}
                         cover={album.coverImage ?? "/Logo512x512.png"}
                         title={album.title}
-                        onClick={() => router.push(`/album/${album.slug}`)}
+                        onClick={() => router.push(`/album?slug=${encodeURIComponent(album.slug)}`)}
                     />
                 ))}
             </div>

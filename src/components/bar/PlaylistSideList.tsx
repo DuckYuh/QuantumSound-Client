@@ -30,7 +30,7 @@ export default function PlaylistSideList({ targetUser }: PlaylistSideListProps) 
     const displayedPlaylists = showAll ? playlists : playlists.slice(0, 3);
 
     async function onPlaylistClick(id: string) {
-        router.push(`/playlist/${id}`);
+        router.push(`/playlist?id=${encodeURIComponent(id)}`);
     }
 
     if (isLoading) {

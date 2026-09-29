@@ -541,6 +541,195 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }, [volume]);
 
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+
+      // Không bắt phím khi đang nhập text
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.tagName === "SELECT" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+
+      // Space: Play / Pause
+      if (event.code === "Space") {
+        event.preventDefault();
+
+        togglePlay();
+        return;
+      }
+
+      // Arrow Right: Next
+      if (event.code === "ArrowRight") {
+        event.preventDefault();
+
+        next();
+        return;
+      }
+
+      // Arrow Left: Previous
+      if (event.code === "ArrowLeft") {
+        event.preventDefault();
+
+        previous();
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [togglePlay, next, previous]);
+
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+
+    if (!currentTrack) {
+      navigator.mediaSession.metadata = null;
+      return;
+    }
+
+    const artwork = currentTrack.coverImage || currentTrack.album?.coverImage;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentTrack.title,
+      artist: currentTrack.artist?.displayName || currentTrack.artist?.username || "",
+      album: currentTrack.album?.title || "QuantumSound",
+      artwork: artwork
+        ? [
+            {
+              src: artwork,
+              sizes: "512x512",
+              type: "image/png",
+            },
+          ]
+        : [],
+    });
+  }, [currentTrack]);
+
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+
+    navigator.mediaSession.playbackState = isPlaying
+      ? "playing"
+      : "paused";
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+
+    const mediaSession = navigator.mediaSession;
+
+    const handlePlay = () => {
+      resume();
+    };
+
+    const handlePause = () => {
+      pause();
+    };
+
+    const handleNextTrack = () => {
+      next();
+    };
+
+    const handlePreviousTrack = () => {
+      previous();
+    };
+
+    const handleSeekBackward = (details: MediaSessionActionDetails) => {
+      const offset = details.seekOffset ?? 10;
+      seek(Math.max(0, currentTime - offset));
+    };
+
+    const handleSeekForward = (details: MediaSessionActionDetails) => {
+      const offset = details.seekOffset ?? 10;
+      seek(Math.min(duration, currentTime + offset));
+    };
+
+    const handleSeekTo = (details: MediaSessionActionDetails) => {
+      if (details.seekTime == null) {
+        return;
+      }
+
+      seek(details.seekTime);
+    };
+
+    try {
+      mediaSession.setActionHandler("play", handlePlay);
+      mediaSession.setActionHandler("pause", handlePause);
+      mediaSession.setActionHandler("nexttrack", handleNextTrack);
+      mediaSession.setActionHandler("previoustrack", handlePreviousTrack);
+      mediaSession.setActionHandler("seekbackward", handleSeekBackward);
+      mediaSession.setActionHandler("seekforward", handleSeekForward);
+      mediaSession.setActionHandler("seekto", handleSeekTo);
+    } catch (error) {
+      console.warn("Media Session action handler setup failed:", error);
+    }
+
+    return () => {
+      try {
+        mediaSession.setActionHandler("play", null);
+        mediaSession.setActionHandler("pause", null);
+        mediaSession.setActionHandler("nexttrack", null);
+        mediaSession.setActionHandler("previoustrack", null);
+        mediaSession.setActionHandler("seekbackward", null);
+        mediaSession.setActionHandler("seekforward", null);
+        mediaSession.setActionHandler("seekto", null);
+      } catch {
+        // Ignore unsupported Media Session actions.
+      }
+    };
+  }, [resume, pause, next, previous, seek, currentTime, duration]);
+
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+
+    if (!currentTrack) {
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.playbackState = "none";
+      return;
+    }
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentTrack.title,
+      artist: currentTrack.artist?.displayName ?? currentTrack.artist?.username ?? "",
+      album: currentTrack.album?.title ?? "QuantumSound",
+      artwork: currentTrack.coverImage
+        ? [
+            {
+              src: currentTrack.coverImage,
+              sizes: "512x512",
+              type: "image/jpeg",
+            },
+          ]
+        : [],
+    });
+  }, [currentTrack]);
+
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+
+    navigator.mediaSession.playbackState = isPlaying
+      ? "playing"
+      : "paused";
+  }, [isPlaying]);
+
+  useEffect(() => {
     listenRecordedRef.current = null;
   }, [currentTrack?.id]);
 

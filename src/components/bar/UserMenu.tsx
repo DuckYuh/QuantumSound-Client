@@ -13,7 +13,7 @@ export function UserMenu({ user, logout }: Props) {
     const router = useRouter();
 
     async function handleProfileClick() {
-        router.push("/profile/" + user.username);
+        router.push(`/profile?username=${encodeURIComponent(user.username)}`);
     }
 
     async function handleSettingsClick() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import { playlistService } from "@/services/playlist.service";
 import { useRouter } from "next/navigation";
 import { Settings } from "lucide-react";
@@ -15,12 +15,11 @@ import {
 import { queryKeys } from "@/lib/query-keys";
 
 interface Props {
-    params: Promise<{ id: string }>;
+    id: string;
 }
 
-export default function PlaylistInfo({ params }: Props) {
+export default function PlaylistInfo({ id }: Props) {
     const { user } = useAuth();
-    const { id } = use(params);
 
     const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
 
@@ -46,7 +45,7 @@ export default function PlaylistInfo({ params }: Props) {
             });
 
             router.push(
-                `/profile/${playlist.owner.username}`
+                `/profile?username=${encodeURIComponent(playlist.owner.username)}`
             );
         },
     });
@@ -72,7 +71,7 @@ export default function PlaylistInfo({ params }: Props) {
         if (!playlist) return;
 
         router.push(
-            `/profile/${playlist.owner.username}`
+            `/profile?username=${encodeURIComponent(playlist.owner.username)}`
         );
     }
 

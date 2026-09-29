@@ -51,14 +51,14 @@ export default function SearchDropdown({ query, onQueryChangeAction }: SearchDro
         } else if (itemType === "album") {
             requireAuth(() => {
                 if (user) {
-                    window.location.href = `/album/${itemId}`;
+                    window.location.href = `/album?slug=${encodeURIComponent(itemId)}`;
                     onQueryChangeAction?.("");
                 }
             });
         } else if (itemType === "artist") {
             requireAuth(() => {
                 if (user) {
-                    window.location.href = `/profile/${itemId}`;
+                    window.location.href = `/profile?username=${encodeURIComponent(itemId)}`;
                     onQueryChangeAction?.("");
                 }
             });
@@ -100,7 +100,7 @@ export default function SearchDropdown({ query, onQueryChangeAction }: SearchDro
                                 {albums.map((album) => (
                                     <SearchItem
                                         key={album.id}
-                                        href={user ? `/album/${album.slug}` : undefined}
+                                        href={user ? `/album?slug=${encodeURIComponent(album.slug)}` : undefined}
                                         onClick={() => handleItemClick("album", album.id)}
                                         title={album.title}
                                         image={album.coverImage ?? "/Logo512x512.png"}
@@ -116,7 +116,7 @@ export default function SearchDropdown({ query, onQueryChangeAction }: SearchDro
                                 {artists.map((artist) => (
                                     <SearchItem
                                         key={artist.id}
-                                        href={user ? `/profile/${artist.username}` : undefined}
+                                        href={user ? `/profile?username=${encodeURIComponent(artist.username)}` : undefined}
                                         onClick={() => handleItemClick("artist", artist.id)}
                                         title={artist.displayName}
                                         image={artist.avatar ?? "/Logo512x512.png"}
