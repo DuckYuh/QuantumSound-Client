@@ -1,15 +1,15 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { SearchResults } from "@/components/search/SearchResult";
 import SearchBar from "@/components/search/SearchBar";
 
-interface SearchPageProps {
-    searchParams: Promise<{
-        query?: string;
-    }>;
-}
+export default function SearchPage() {
+    const [query, setQuery] = useState("");
 
-export default async function SearchPage({searchParams, }: SearchPageProps) {
-    const params = await searchParams;
-    const query = params.query?.trim() ?? "";
+    useEffect(() => {
+        setQuery(new URLSearchParams(window.location.search).get("query")?.trim() ?? "");
+    }, []);
 
     if (query === "") {
         return (

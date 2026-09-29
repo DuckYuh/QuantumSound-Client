@@ -41,7 +41,7 @@ export default function AlbumEditForm({ albumId, open, onClose, onEdited, }: Alb
                 queryClient.invalidateQueries({ queryKey: queryKeys.myAlbums(), }),
             ]);
 
-            router.push(`/album/${response.data.slug}`);
+            router.push(`/album?slug=${encodeURIComponent(response.data.slug)}`);
         },
     });
 

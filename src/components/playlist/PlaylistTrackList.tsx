@@ -1,6 +1,5 @@
 'use client'
 
-import { use } from "react";
 import { useAudio } from "@/providers/AudioProvider";
 import { playlistService } from "@/services/playlist.service";
 import { trackService } from "@/services/track.service";
@@ -14,10 +13,9 @@ import { queryKeys } from "@/lib/query-keys";
 import type { Track } from "@/types/track";
 import type { Playlist, PlaylistTrack } from "@/types/playlist";
 
-interface Props { params: Promise<{ id: string }>; }
+interface Props { id: string; }
 
-export default function PlaylistTrackList({ params }: Props) {
-    const { id } = use(params);
+export default function PlaylistTrackList({ id }: Props) {
     const { user } = useAuth();
     const { playTrack } = useAudio();
     const router = useRouter();
@@ -52,11 +50,11 @@ export default function PlaylistTrackList({ params }: Props) {
         catch (error) { console.error("Error removing track from playlist:", error); toast.error("Failed to remove track from playlist."); }
     }
     async function moveToAlbum(trackId: string) {
-        try { router.push(`/album/${(await trackService.getTrackById(trackId)).data.album.slug}`); }
+        try { router.push(`/album?slug=${encodeURIComponent((await trackService.getTrackById(trackId)).data.album.slug)}`); }
         catch (error) { console.error("Error moving to album:", error); }
     }
     async function moveToArtist(trackId: string) {
-        try { router.push(`/profile/${(await trackService.getTrackById(trackId)).data.artist.username}`); }
+        try { router.push(`/profile?username=${encodeURIComponent((await trackService.getTrackById(trackId)).data.artist.username)}`); }
         catch (error) { console.error("Error moving to artist:", error); }
     }
     if (isLoading) return <div>Loading...</div>;

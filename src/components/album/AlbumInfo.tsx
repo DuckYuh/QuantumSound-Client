@@ -61,7 +61,7 @@ export default function AlbumInfo({
       });
 
       router.push(
-        `/profile/${albumResponse.artist.username}`
+        `/profile?username=${encodeURIComponent(albumResponse.artist.username)}`
       );
     },
   });
@@ -70,7 +70,7 @@ export default function AlbumInfo({
     if (!albumResponse) return;
 
     router.push(
-      `/profile/${albumResponse.artist.username}`
+      `/profile?username=${encodeURIComponent(albumResponse.artist.username)}`
     );
   }
 

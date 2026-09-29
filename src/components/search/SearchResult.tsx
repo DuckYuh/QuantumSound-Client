@@ -114,7 +114,7 @@ export function SearchResults({query, }: Props) {
                         {albums.map((album: Album) => (
                             <SearchItem 
                                 key={album.id} 
-                                href={user ? `/album/${album.slug}` : undefined}
+                                href={user ? `/album?slug=${encodeURIComponent(album.slug)}` : undefined}
                                 onClick={() => requireAuth(() => undefined)}
                                 title={album.title}
                                 image={album.coverImage ?? "/Logo512x512.png"}
@@ -134,7 +134,7 @@ export function SearchResults({query, }: Props) {
                         {users.map((searchUser: User) => (
                             <SearchItem 
                                 key={searchUser.id} 
-                                href={user ? `/profile/${searchUser.username}` : undefined}
+                                href={user ? `/profile?username=${encodeURIComponent(searchUser.username)}` : undefined}
                                 onClick={() => requireAuth(() => undefined)}
                                 title={searchUser.displayName}
                                 image={searchUser.avatar ?? "/Logo512x512.png"}
