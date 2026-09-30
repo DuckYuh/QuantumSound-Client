@@ -9,6 +9,7 @@ import {
     Disc3,
     Tags,
     ListMusic,
+    Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,11 @@ const navigation = [
         label: "Tags",
         href: "/admin/tags",
         icon: Tags,
+    },
+    {
+        label: "Releases",
+        href: "/admin/download",
+        icon: Download,
     },
 ];
 

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import { Slot } from "@radix-ui/react-slot";
 
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,8 @@ const buttonVariants = cva(
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
 		VariantProps<typeof buttonVariants> {
+	asChild?: boolean;
+
 	loading?: boolean;
 
 	leftIcon?: React.ReactNode;
@@ -73,6 +76,7 @@ export function Button({
 	className, 
 	variant, 
 	size, 
+	asChild,
 	loading, 
 	leftIcon, 
 	rightIcon, 
@@ -80,8 +84,10 @@ export function Button({
 	disabled, 
 	...props 
 }: ButtonProps) {
+	const Comp = asChild ? Slot : "button";
+
 	return (
-		<button
+		<Comp
 			className={cn(
 				buttonVariants({
 					variant,
@@ -92,25 +98,29 @@ export function Button({
 			disabled={disabled || loading}
 			{...props}
 		>
-			{loading && (
-				<span
-					className="
-                    h-4
-                    w-4
-                    animate-spin
-                    rounded-full
-                    border-2
-                    border-current
-                    border-t-transparent
-                "
-				/>
+			{asChild ? (
+				children
+			) : (
+				<>
+					{loading && (
+						<span
+							className="
+								h-4
+								w-4
+								animate-spin
+								rounded-full
+								border-2
+								border-current
+								border-t-transparent
+							"
+						/>
+					)}
+
+					{!loading && leftIcon}
+					{children}
+					{!loading && rightIcon}
+				</>
 			)}
-
-			{!loading && leftIcon}
-
-			<span>{children}</span>
-
-			{!loading && rightIcon}
-		</button>
+		</Comp>
 	);
 }

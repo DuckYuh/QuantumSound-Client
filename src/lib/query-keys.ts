@@ -22,4 +22,9 @@ export const queryKeys = {
     tags: () => ["admin", "tags"] as const,
     tag: (id: string) => ["admin", "tags", id] as const,
   },
+  appReleases: {
+    all: () => ["app-releases"] as const,
+    platform: (platform: string) =>
+        ["app-releases", platform] as const,
+  },
 };
