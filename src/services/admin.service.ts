@@ -4,6 +4,7 @@ import { AdminAlbumQuery, AdminUpdateAlbumStatus } from "@/types/album";
 import { AdminTrackQuery, AdminUpdateTrackStatus } from "@/types/track";
 import { Genre } from "@/types/genre";
 import { Tag } from "@/types/tag";
+import { AppPlatform, CreateAppReleaseRequest } from "@/types/app-release";
 
 export const getAdminData = {
     getAllUser() {
@@ -96,5 +97,29 @@ export const getAdminData = {
 
     deleteTag(tagId: string) {
         return api.delete(`/admin/tags/${tagId}`);
-    }
+    },
+    
+    upsert(
+        platform: AppPlatform,
+        data: CreateAppReleaseRequest
+    ) {
+        const formData = new FormData();
+
+        formData.append("version", data.version);
+
+        if (data.releaseNotes) {
+            formData.append("/admin/releaseNotes", data.releaseNotes);
+        }
+
+        formData.append("file", data.file);
+
+        return api.put(
+            `/admin/app-releases/${platform}`,
+            formData
+        );
+    },
+
+    delete(platform: AppPlatform) {
+        return api.delete(`/admin/app-releases/${platform}`);
+    },
 }
