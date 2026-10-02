@@ -34,7 +34,7 @@ export default function RegisterForm({
     try {
       const response = await authService.register({username, displayName, email, password,});
       console.log("Đăng ký thành công:", response);
-      login(response.data.access_token, response.data.user);
+      await login(response.data.access_token, response.data.user, response.data.refresh_token,);
       toast.success("Account created successfully.");
       router.refresh(); 
       router.push("/");

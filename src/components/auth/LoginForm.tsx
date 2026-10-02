@@ -31,7 +31,7 @@ export default function LoginForm({
     try {
       const response = await authService.login({ email, password });
       console.log("Đăng nhập thành công:", response);
-      login(response.data.access_token, response.data.user);
+      await login(response.data.access_token, response.data.user, response.data.refresh_token,);
       toast.success("Welcome back!");
       router.refresh(); 
       router.push("/");
