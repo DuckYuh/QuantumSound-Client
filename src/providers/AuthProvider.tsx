@@ -98,6 +98,16 @@ export function AuthProvider({ children, }: { children: ReactNode; }) {
         await authTokens.setAccessToken(token);
 
         setUser(user);
+
+        // The login payload may not contain the latest profile fields, such as
+        // the avatar URL. Fetch the canonical user after the tokens are ready.
+        try {
+            const response = await authService.me();
+            setUser(response.data);
+        } catch (error) {
+            // Keep the user returned by login if the profile request fails.
+            console.error("Failed to refresh user after login:", error);
+        }
     }
 
     async function logout() {
