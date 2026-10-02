@@ -1,7 +1,28 @@
+ "use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function AdminLayout({ children, }: { children: React.ReactNode; }) {
+    const router = useRouter();
+    const { user, loading } = useAuth();
+
+    useEffect(() => {
+        if (!loading && !user) {
+            router.replace("/login");
+        } else if (!loading && user?.role !== "ADMIN") {
+            router.replace("/");
+        }
+    }, [loading, user, router]);
+
+    if (loading || !user || user.role !== "ADMIN") {
+        return <p>Loading...</p>;
+    }
+
     return (
         <div className="min-h-screen bg-background text-foreground">
             <AdminSidebar />
