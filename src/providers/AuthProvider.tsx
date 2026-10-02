@@ -1,17 +1,20 @@
-"use client";   
+"use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode, } from "react";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import axios from "axios";
 import { authService } from "@/services/auth.service";
 import { User } from "@/types/user";
+import { api } from "@/lib/api";
+import { authTokens } from "@/lib/auth-tokens";
 
 interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  login: (token: string, user: User) => void;
-  logout: () => void;
-  refreshUser: () => Promise<void>;
-  updateUser: (data: Partial<User>) => void;
+    user: User | null;
+    loading: boolean;
+    login: (token: string, user: User, refreshToken: string) => Promise<void>;
+    logout: () => void;
+    refreshUser: () => Promise<void>;
+    updateUser: (data: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,28 +24,62 @@ export function AuthProvider({ children, }: { children: ReactNode; }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
+    async function restoreAccessToken(): Promise<boolean> {
+        const refreshToken = await authTokens.getRefreshToken();
+
+        if (!refreshToken) {
+            return false;
+        }
+
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+            { refresh_token: refreshToken },
+            { withCredentials: true },
+        );
+
+        const { access_token, refresh_token } = response.data;
+
+        if (!access_token || !refresh_token) {
+            throw new Error("Invalid refresh response");
+        }
+
+        await authTokens.setRefreshToken(refresh_token);
+        await authTokens.setAccessToken(access_token);
+
+        return true;
+    }
+
     async function refreshUser() {
         try {
-            const token = localStorage.getItem("access_token");
+            let token = await authTokens.getAccessToken();
 
             if (!token) {
-                setUser(null);
-                return;
+                const restored = await restoreAccessToken();
+
+                if (!restored) {
+                    setUser(null);
+                    return;
+                }
+
+                token = await authTokens.getAccessToken();
+            }
+
+            if (!token) {
+                throw new Error("Access token was not persisted after refresh");
             }
 
             const res = await authService.me();
             setUser(res.data);
-        } catch(error) {
-            console.log("Auth failed");
-            localStorage.removeItem(
-                "access_token"
-            );
+        } catch (error) {
+            // Không xóa token chỉ vì lỗi mạng/server.
+            // Axios interceptor sẽ tự refresh nếu nhận 401.
+            console.error("Failed to restore authenticated session:", error);
             setUser(null);
         }
     }
 
     useEffect(() => {
-        async function init(){
+        async function init() {
             await refreshUser();
             setLoading(false);
         }
@@ -50,19 +87,49 @@ export function AuthProvider({ children, }: { children: ReactNode; }) {
         init();
     }, []);
 
-    function login( token:string, user:User ) {
-        localStorage.setItem(
-            "access_token",
-            token
-        );
+    async function login(
+        token: string,
+        user: User,
+        refreshToken: string,
+    ) {
+        // Lưu refresh token trước để tránh login thành công
+        // nhưng chưa có token dùng để refresh phiên.
+        await authTokens.setRefreshToken(refreshToken);
+        await authTokens.setAccessToken(token);
+
         setUser(user);
     }
 
-    function logout() {
-        localStorage.removeItem(
-            "access_token"
-        );
+    async function logout() {
+        let refreshToken: string | null = null;
+
+        try {
+            refreshToken = await authTokens.getRefreshToken();
+        } catch (error) {
+            console.error("Failed to read refresh token", error);
+        }
+
+        // Xóa token và cập nhật UI ngay khi có thể.
         setUser(null);
+
+        try {
+            await authTokens.clear();
+        } catch (error) {
+            console.error("Failed to clear auth tokens", error);
+        }
+
+        // Thu hồi session ở backend.
+        if (refreshToken) {
+            try {
+                await api.post("/auth/logout", {
+                    refresh_token: refreshToken,
+                });
+            } catch {
+                // Token local đã bị xóa; nếu mạng lỗi,
+                // session backend sẽ hết hạn theo TTL.
+                console.error("Failed to revoke refresh session");
+            }
+        }
     }
 
     function updateUser(data: Partial<User>) {
@@ -93,7 +160,7 @@ export function AuthProvider({ children, }: { children: ReactNode; }) {
 export function useAuth() {
     const context = useContext(AuthContext);
 
-    if(!context){
+    if (!context) {
         throw new Error(
             "useAuth must be used inside AuthProvider"
         );
